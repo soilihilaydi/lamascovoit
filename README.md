@@ -529,3 +529,6 @@ Bienvenue dans la section des technologies frontend utilisées pour le développ
 
 - [ ] 🎬 Marquer le lancement du projet
 - [ ] 📝 Effectuer la première revue du code
+
+
+### 🚀
