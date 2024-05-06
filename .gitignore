@@ -1,20 +1,38 @@
-# Ignorer tout sauf les répertoires et fichiers spécifiés
-/*
-!api/
-!client/
-!.gitignore
-!README.md
+# Ignore les modules Node.js installés
+node_modules/
 
-# Ignorer tous les fichiers .env
-**/.env
+# Ignore les fichiers de build
+/dist/
+/build/
+/tmp/
 
-# Ignorer tous les fichiers dans api et client, sauf ceux spécifiés
-api/*
-!api/*.md
-!api/*.js
+# Ignore les fichiers de logs
+npm-debug.log*
+*.log
 
-client/*
-!client/*.md
-!client/*.js
-!client/*.html
-!client/*.css
+# Ignore les fichiers de configuration spécifiques à l'éditeur
+.vscode/
+
+# Ignore les fichiers de sauvegarde de système d'exploitation
+.DS_Store
+
+# Ignore les fichiers de cache
+.cache/
+
+# Ignore les rapports de couverture de tests
+coverage/
+*.coverage
+*.nyc_output
+
+# Ignore les fichiers de production
+/build/
+
+# Ignore les fichiers de base de données
+*.sql
+
+# Ignore les fichiers d'archives compressées
+*.tgz
+*.zip
+
+# Ignore les fichiers de variables d'environnement
+.env
