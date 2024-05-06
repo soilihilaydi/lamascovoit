@@ -402,6 +402,11 @@ Bienvenue dans la section des technologies frontend utilisées pour le développ
 
 - 🗝️ Module pour charger les variables d'environnement à partir d'un fichier `.env`.
 
+## 7. Nodemon 🔄
+
+ - 🗝️ Nodemon est un utilitaire qui surveille les modifications de fichiers dans votre projet Node.js et redémarre automatiquement le serveur .
+
+
 ##
 
 # 🗓 Planification Agile Scrum pour le site de covoituge local Lamastre-covoit
@@ -435,9 +440,9 @@ Bienvenue dans la section des technologies frontend utilisées pour le développ
 
 ### 🔍 Lundi #Revue
 
-- [ ] 📊 Réaliser la revue du Sprint 1
+- [x] 📊 Réaliser la revue du Sprint 1
 - [ ] 🔄 Organiser la rétrospective du sprint
-- [ ] 🗓 Planifier le Sprint 2
+- [x] 🗓 Planifier le Sprint 2
 
 ### 👨‍💻 Mardi à Vendredi #Développement
 
