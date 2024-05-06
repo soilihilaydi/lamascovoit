@@ -6,7 +6,7 @@ dotenv.config();
 
 const PORT = process.env.PORT;
 
-
+// Tentez d'authentifier et de connecter Sequelize à votre base de données
 sequelize.authenticate()
     .then(() => {
         console.log('hey man la Connexion à la base de données ben ca roule man');
@@ -19,3 +19,4 @@ sequelize.authenticate()
         // Log des erreurs si la connexion à la base de données échoue
         console.error('Impossible de se connecter à la base de données:', err);
     });
+
