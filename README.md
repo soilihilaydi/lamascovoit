@@ -440,9 +440,9 @@ Bienvenue dans la section des technologies frontend utilisées pour le développ
 
 ### 🔍 Lundi #Revue
 
-- [ ] 📊 Réaliser la revue du Sprint 1
+- [x] 📊 Réaliser la revue du Sprint 1
 - [ ] 🔄 Organiser la rétrospective du sprint
-- [ ] 🗓 Planifier le Sprint 2
+- [x] 🗓 Planifier le Sprint 2
 
 ### 👨‍💻 Mardi à Vendredi #Développement
 
