@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize';
+import Sequelize from 'sequelize';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -19,7 +19,6 @@ const config = {
         database: process.env.TEST_DB_NAME,
         host: process.env.TEST_DB_HOST,
         dialect: process.env.TEST_DB_DIALECT,
-        logging: console.log,
     },
     production: {
         username: process.env.DB_USER,
@@ -46,10 +45,10 @@ const sequelize = new Sequelize(
     {
        host: environmentConfig.host,
         dialect: environmentConfig.dialect,
-        logging: environmentConfig.logging,
     }
 );
 
 export default sequelize;
+
 
 
