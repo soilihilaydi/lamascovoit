@@ -7,7 +7,7 @@ jest.mock('../../src/models/utilisateurModel'); // Mockez le modèle Utilisateur
 jest.mock('bcrypt'); // Mockez le module bcrypt
 
 describe('POST /api/utilisateurs/inscription', () => {
-  it('should create a new user and return 201 status code', async () => {
+  it('devrait crée un nouvel utilisateur et renvoye le code 201', async () => {
     const mockUser = {
       email: 'test@test.com',
       password: 'password',
