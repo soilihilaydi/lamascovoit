@@ -1,28 +1,27 @@
 import jwt from 'jsonwebtoken';
 import Utilisateur from '../models/utilisateurModel.js';
 
-const authMiddleware = async (req, res, next) => {
-  try {
-    // Récupérer le jeton JWT depuis les en-têtes de la requête
-    const token = req.headers.authorization.split(' ')[1];
+export default async function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
 
-    // Vérifier et décoder le jeton JWT
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
 
-    // Récupérer l'utilisateur correspondant
-    const user = await Utilisateur.findByPk(decoded.id);
-
-    if (!user) {
-      return res.status(401).json({ message: 'Utilisateur non authentifié' });
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+      const user = await Utilisateur.findById(decoded.idUtilisateur);
+    
+      if (user) {
+        req.user = user;
+        next();
+      } else {
+        return res.status(401).json({ message: 'Jeton JWT invalide ou expiré' });
+      }
+    } catch (err) {
+      return res.status(401).json({ message: 'Jeton JWT invalide ou expiré' });
     }
-
-    // Ajouter l'utilisateur authentifié à l'objet de requête
-    req.user = user;
-
-    next();
-  } catch (error) {
-    res.status(401).json({ message: 'Utilisateur non authentifié' });
+  } else {
+    return res.status(401).json({ message: 'Jeton JWT manquant' });
   }
-};
-
-export default authMiddleware;
+}
