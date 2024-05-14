@@ -1,5 +1,3 @@
-import jwt from 'jsonwebtoken';
-import Utilisateur from '../../src/models/utilisateurModel.js';
 import authMiddleware from '../../src/middlewares/authMiddleware.js';
 
 const mockNext = jest.fn();
