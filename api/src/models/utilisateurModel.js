@@ -38,11 +38,13 @@ Utilisateur.init(
     },
     adresse: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      defaultValue: 'Adresse par défaut'
     },
     telephone: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      defaultValue: '0123456789'
     },
     photoUrl: {
       type: DataTypes.STRING,
@@ -50,7 +52,8 @@ Utilisateur.init(
     },
     role: {
       type: DataTypes.ENUM('passager', 'conducteur'),
-      allowNull: false
+      allowNull: false,
+      defaultValue: 'passager'
     }
   },
   {

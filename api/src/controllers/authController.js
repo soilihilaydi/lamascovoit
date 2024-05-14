@@ -1,29 +1,33 @@
 import Utilisateur from '../models/utilisateurModel.js';
+import * as bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 export const register = async (req, res) => {
   try {
-    const { email, password, nom, adresse, telephone, photoUrl, role } = req.body;
+    const { nom, email, password } = req.body;
 
-    // Hashage du mot de passe
-    const hashedPassword = await Utilisateur.hashPassword(password);
+    // Vérifier si l'utilisateur existe déjà
+    const existingUser = await Utilisateur.findOne({ where: { email } });
+    if (existingUser) {
+      console.log('Utilisateur existant');
+      return res.status(400).json({ error: 'Cet e-mail est déjà enregistré' });
+    }
 
-    const newUser = await Utilisateur.create({
-      email,
-      password: hashedPassword,
-      nom,
-      adresse,
-      telephone,
-      photoUrl,
-      role
-    });
+    // Hasher le mot de passe
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Génération du jeton JWT
-    const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET);
+    // Créer le nouvel utilisateur
+    const newUser = await Utilisateur.create({ nom, email, password: hashedPassword });
 
-    res.status(201).json({ ...newUser.toJSON(), token });
+    // Générer un token JWT
+    const token = jwt.sign({ idUtilisateur: newUser.idUtilisateur }, process.env.JWT_SECRET);
+
+    console.log('Nouvel utilisateur créé');
+    return res.status(201).json({ token, user: { idUtilisateur: newUser.idUtilisateur, nom, email } });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Erreur lors de l\'enregistrement :', error);
+    return res.status(400).json({ error: error.message });
   }
 };
 
@@ -31,23 +35,27 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Vérifier si l'utilisateur existe
+    // Trouver l'utilisateur
     const user = await Utilisateur.findOne({ where: { email } });
     if (!user) {
-      return res.status(401).json({ message: 'Identifiants invalides' });
+      console.log('Utilisateur non trouvé');
+      return res.status(401).json({ error: 'Identifiants invalides' });
     }
 
     // Vérifier le mot de passe
-    const isValid = await Utilisateur.verifyPassword(password, user.password);
-    if (!isValid) {
-      return res.status(401).json({ message: 'Identifiants invalides' });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      console.log('Mot de passe incorrect');
+      return res.status(401).json({ error: 'Identifiants invalides' });
     }
 
-    // Génération du jeton JWT
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
+    // Générer un token JWT
+    const token = jwt.sign({ idUtilisateur: user.idUtilisateur }, process.env.JWT_SECRET);
 
-    res.status(200).json({ token });
+    console.log('Utilisateur connecté');
+    return res.status(200).json({ token, user: { idUtilisateur: user.idUtilisateur, nom: user.nom, email: user.email } });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Erreur lors de la connexion :', error);
+    return res.status(400).json({ error: error.message });
   }
 };
