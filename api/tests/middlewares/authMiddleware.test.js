@@ -3,7 +3,7 @@ import authMiddleware from '../../src/middlewares/authMiddleware.js';
 
 jest.mock('jsonwebtoken');
 jest.mock('../../src/models/utilisateurModel.js', () => ({
-  findById: jest.fn()
+  findByPk: jest.fn()
 }));
 
 describe('Auth Middleware', () => {
@@ -29,12 +29,12 @@ describe('Auth Middleware', () => {
   });
 
   it('Jeton JWT valide', async () => {
-    const mockUser = { _id: 'mockUserId' };
-    const mockDecodedToken = { idUtilisateur: mockUser._id };
+    const mockUser = { idUtilisateur: 'mockUserId' };
+    const mockDecodedToken = { idUtilisateur: mockUser.idUtilisateur };
 
     jwt.verify.mockReturnValueOnce(mockDecodedToken);
     const mockUtilisateurModel = require('../../src/models/utilisateurModel.js');
-    mockUtilisateurModel.findById.mockResolvedValueOnce(mockUser);
+    mockUtilisateurModel.findByPk.mockResolvedValueOnce(mockUser);
 
     await authMiddleware(mockReq, mockRes, mockNext);
 
