@@ -22,71 +22,78 @@ Bienvenue dans la documentation du projet de covoiturage local Lamastrois. Cette
 
 Le backend de l'application est organisé comme suit:
 
-- **`/api`**: Dossier racine du projet.
+/api
+  /node_modules
+  /src
+    /config
+      - db.config.js
+    /controllers
+      - utilisateurController.js
+      - trajetController.js  
+      - reservationController.js
+      - commentaireController.js
+    /models
+      - utilisateurModel.js
+      - trajetModel.js
+      - reservationModel.js
+      - commentaireModel.js
+    /routes
+      - utilisateurRoutes.js
+      - trajetRoutes.js
+      - reservationRoutes.js
+      - commentaireRoutes.js
+    /middlewares
+      - authMiddleware.js
+    /helpers
+      - utilityHelper.js
+  /tests
+    /integration
+      /controllers
+        - utilisateurController.test.js
+        - trajetController.test.js
+        - reservationController.test.js
+        - commentaireController.test.js
+      /models
+        - utilisateurModel.test.js
+        - trajetModel.test.js
+        - reservationModel.test.js
+        - commentaireModel.test.js
+      /routes
+        - utilisateurRoutes.test.js
+        - trajetRoutes.test.js
+        - reservationRoutes.test.js
+        - commentaireRoutes.test.js
+    /unitaires
+      /controllers
+        - utilisateurController.test.js
+        - trajetController.test.js
+        - reservationController.test.js
+        - commentaireController.test.js
+      /models
+        - utilisateurModel.test.js
+        - trajetModel.test.js
+        - reservationModel.test.js
+        - commentaireModel.test.js
+      /routes
+        - utilisateurRoutes.test.js
+        - trajetRoutes.test.js
+        - reservationRoutes.test.js
+        - commentaireRoutes.test.js
+      /middlewares
+        - authMiddleware.test.js
+  /public
+    - 404.html
+    - 500.html
+    /images
+      - 404.png
+      - 500.png
+  - server.js
+  - app.js
+  - package.json
+  - .env
+  - .gitignore
 
-  - **`/node_modules`**: Contient les modules Node.js installés.
-  
-  - **`/src`**: Dossier principal pour le code source de l'application.
-    - **`/config`**: Contient les fichiers de configuration.
-      - **`db.config.js`**: Gère la connexion à la base de données.
-      
-    - **`/controllers`**: Gère les actions liées aux différentes entités.
-      - **`utilisateurController.js`**: Actions CRUD pour les utilisateurs.
-      - **`trajetController.js`**: Actions pour les trajets.
-      - **`reservationController.js`**: Actions pour les réservations.
-      - **`commentaireController.js`**: Actions pour les commentaires.
-      
-    - **`/models`**: Définit les structures des entités de la base de données.
-      - **`utilisateurModel.js`**: Structure de la table des utilisateurs.
-      - **`trajetModel.js`**: Structure de la table des trajets.
-      - **`reservationModel.js`**: Structure des réservations.
-      - **`commentaireModel.js`**: Structure des commentaires.
-      
-    - **`/routes`**: Définit les routes HTTP associées aux contrôleurs.
-      - **`utilisateurRoutes.js`**: Routes pour les actions sur les utilisateurs.
-      - **`trajetRoutes.js`**: Routes pour les actions sur les trajets.
-      - **`reservationRoutes.js`**: Routes pour les actions sur les réservations.
-      - **`commentaireRoutes.js`**: Routes pour les actions sur les commentaires.
-      
-    - **`/middlewares`**: Contient les middlewares pour les contrôles et validations.
-      - **`authMiddleware.js`**: Middleware pour l'authentification.
-      
-    - **`/helpers`**: Contient les fonctions utilitaires pour les tâches courantes.
-      - **`utilityHelper.js`**: Fonctions utilitaires diverses.
-      
-  - **`/tests`**: Contient les tests pour vérifier les différentes couches.
-    - **`/controllers`**: Tests pour les contrôleurs.
-      - **`utilisateurController.test.js`**: Tests pour le contrôleur des utilisateurs.
-      - **`trajetController.test.js`**: Tests pour le contrôleur des trajets.
-      - **`reservationController.test.js`**: Tests pour le contrôleur des réservations.
-      - **`commentaireController.test.js`**: Tests pour le contrôleur des commentaires.
-    - **`/models`**: Tests pour les modèles.
-      - **`utilisateurModel.test.js`**: Tests pour le modèle des utilisateurs.
-      - **`trajetModel.test.js`**: Tests pour le modèle des trajets.
-      - **`reservationModel.test.js`**: Tests pour le modèle des réservations.
-      - **`commentaireModel.test.js`**: Tests pour le modèle des commentaires.
-    - **`/routes`**: Tests pour les routes.
-      - **`utilisateurRoutes.test.js`**: Tests pour les routes des utilisateurs.
-      - **`trajetRoutes.test.js`**: Tests pour les routes des trajets.
-      - **`reservationRoutes.test.js`**: Tests pour les routes des réservations.
-      - **`commentaireRoutes.test.js`**: Tests pour les routes des commentaires.
 
-  - **`/public`**: Contient les fichiers statiques.
-    - **`404.html`**: Page d'erreur 404.
-    - **`500.html`**: Page d'erreur 500.
-    - **`/images`**: Contient les images associées.
-      - **`404.png`**: Image pour la page d'erreur 404.
-      - **`500.png`**: Image pour la page d'erreur 500.
-
-  - **`server.js`**: Démarre le serveur et appelle `app.js`.
-  
-  - **`app.js`**: Configure les routes, middlewares, et autres aspects de l'application.
-
-  - **`package.json`**: Gère les dépendances du projet.
-
-  - **`.env`**: Stocke les variables d'environnement.
-
-  - **`.gitignore`**: Fichier pour ignorer certains fichiers ou dossiers dans Git.
 
 
 ##
@@ -110,7 +117,11 @@ Le backend de l'application est organisé comme suit:
 
 
 
+<<<<<<< HEAD
 ![Description alternative](./api/public/MCD.svg "MCD du site de coivoiturage local")
+=======
+![Description alternative](/api/public/MCD.svg "MCD du site de coivoituge local")
+>>>>>>> 70e85b6 (rectification mise en place)
 
 - **commenter** (<ins>_#idUtilisateur_</ins>, <ins>_#idEvaluation_</ins>)
 - **concerner** (<ins>_#idTrajet_</ins>, <ins>_#idReservation_</ins>)
