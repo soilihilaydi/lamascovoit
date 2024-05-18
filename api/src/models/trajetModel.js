@@ -1,7 +1,7 @@
 // models/trajetModel.js
 
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/database'; // Assurez-vous que le chemin vers votre fichier de configuration de la base de données est correct
+import sequelize from '../config/db.config.js'; 
 
 const Trajet = sequelize.define('Trajet', {
   idTrajet: {
@@ -46,3 +46,4 @@ const Trajet = sequelize.define('Trajet', {
 });
 
 export default Trajet;
+
