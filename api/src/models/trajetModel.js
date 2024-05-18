@@ -41,9 +41,7 @@ const Trajet = sequelize.define('Trajet', {
     defaultValue: DataTypes.NOW
   }
 }, {
-  tableName: 'Trajets',
   timestamps: true 
 });
 
 export default Trajet;
-

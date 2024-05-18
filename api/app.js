@@ -2,6 +2,7 @@
 
 import express from 'express';
 import utilisateurRoutes from './src/routes/utilisateurRoutes.js';
+
 import { authMiddleware } from './src/middlewares/authMiddleware.js';
 
 
@@ -15,6 +16,7 @@ app.use(authMiddleware);
 
 // les routes 
 app.use('/api', utilisateurRoutes);
+
 
 export default app;
 
