@@ -4,6 +4,14 @@ import app from '../../../app.js';
 import { Utilisateur } from '../../../src/models/utilisateurModel.js';
 import dotenv from 'dotenv';
 
+// Mock du middleware d'authentification
+jest.mock('../../../src/middlewares/authMiddleware', () => ({
+  authMiddleware: jest.fn((req, res, next) => {
+    // Autoriser toutes les requêtes sans vérifier l'authentification
+    next();
+  })
+}));
+
 dotenv.config();
 
 const sequelize = new Sequelize({
@@ -70,7 +78,7 @@ describe('Utilisateur Controller', () => {
     expect(response.body.Email).toBe(user.Email);
   });
 
-  it('should update a user by IDdevrait mettre à jour un utilisateur par ID', async () => {
+  it('devrait mettre à jour un utilisateur par ID', async () => {
     const user = await Utilisateur.create({
       Email: 'update@example.com',
       MotDePasse: 'motdepasse123',
@@ -112,4 +120,5 @@ describe('Utilisateur Controller', () => {
     expect(fetchedUser).toBeNull();
   });
 });
+
 

@@ -1,4 +1,3 @@
-// utilisateurModel.test.js
 import { Utilisateur, sequelize } from '../../../src/models/utilisateurModel.js';
 
 describe('Utilisateur Model', () => {
@@ -8,6 +7,11 @@ describe('Utilisateur Model', () => {
     } catch (error) {
       console.error('Error syncing database:', error);
     }
+  });
+
+  afterEach(async () => {
+    // Nettoyer la table des utilisateurs après chaque test
+    await Utilisateur.destroy({ where: {} });
   });
 
   afterAll(async () => {
@@ -29,17 +33,23 @@ describe('Utilisateur Model', () => {
       Rôle: 'conducteur'
     };
 
-    const nouvelUtilisateur = await Utilisateur.create(userData);
+    try {
+      // Ajouter l'utilisateur à la base de données
+      const nouvelUtilisateur = await Utilisateur.create(userData);
 
-    expect(nouvelUtilisateur.Email).toBe(userData.Email);
-    expect(nouvelUtilisateur.MotDePasse).toBe(userData.MotDePasse);
-    expect(nouvelUtilisateur.Nom).toBe(userData.Nom);
-    expect(nouvelUtilisateur.Adresse).toBe(userData.Adresse);
-    expect(nouvelUtilisateur.NuméroDeTéléphone).toBe(userData.NuméroDeTéléphone);
-    expect(nouvelUtilisateur.PhotoUrl).toBe(userData.PhotoUrl);
-    expect(nouvelUtilisateur.Rôle).toBe(userData.Rôle);
-
-    // Supprimer l'utilisateur créé après le test
-    await nouvelUtilisateur.destroy();
+      // Vérifier si l'utilisateur a été correctement ajouté
+      expect(nouvelUtilisateur.Email).toBe(userData.Email);
+      expect(nouvelUtilisateur.MotDePasse).toBe(userData.MotDePasse);
+      expect(nouvelUtilisateur.Nom).toBe(userData.Nom);
+      expect(nouvelUtilisateur.Adresse).toBe(userData.Adresse);
+      expect(nouvelUtilisateur.NuméroDeTéléphone).toBe(userData.NuméroDeTéléphone);
+      expect(nouvelUtilisateur.PhotoUrl).toBe(userData.PhotoUrl);
+      expect(nouvelUtilisateur.Rôle).toBe(userData.Rôle);
+    } catch (error) {
+      // Gérer les erreurs
+      console.error('Error creating user:', error);
+      throw error; // Remonter l'erreur pour échouer le test
+    }
   });
 });
+

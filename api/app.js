@@ -1,12 +1,20 @@
+// app.js
+
 import express from 'express';
 import utilisateurRoutes from './src/routes/utilisateurRoutes.js';
+import { authMiddleware } from './src/middlewares/authMiddleware.js';
+
 
 const app = express();
 
 // Middleware pour parser le JSON
 app.use(express.json());
 
-// Utiliser les routes 
+// Middleware d'authentification
+app.use(authMiddleware);
+
+// Utiliser les routes utilisateur
 app.use('/api', utilisateurRoutes);
 
 export default app;
+

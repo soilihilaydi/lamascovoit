@@ -3,6 +3,17 @@ import dotenv from 'dotenv';
 import app from '../../../app.js';
 import { Utilisateur, sequelize } from '../../../src/models/utilisateurModel.js';
 
+
+// Mock du middleware d'authentification
+jest.mock('../../../src/middlewares/authMiddleware', () => {
+  return {
+    authMiddleware: jest.fn((req, res, next) => {
+      // Autoriser toutes les requêtes sans vérifier l'authentification
+      next();
+    })
+  };
+});
+
 dotenv.config();
 
 beforeAll(async () => {
