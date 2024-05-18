@@ -1,15 +1,12 @@
-import 'dotenv/config';
-import express from "express";
-
+import express from 'express';
+import utilisateurRoutes from './src/routes/utilisateurRoutes.js';
 
 const app = express();
 
-
-// Middleware pour parser le corps des requêtes en JSON
+// Middleware pour parser le JSON
 app.use(express.json());
 
-// Routes
-
-
+// Utiliser les routes 
+app.use('/api', utilisateurRoutes);
 
 export default app;
