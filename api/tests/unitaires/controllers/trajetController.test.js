@@ -35,7 +35,7 @@ describe('Trajet Controller', () => {
     jest.clearAllMocks();
   });
 
-  it('should create a new trajet', async () => {
+  it('devrait créer un nouveau trajet', async () => {
     const trajetData = { Depart: 'A', Arrivee: 'B', DateHeure: '2022-12-12', PlacesDisponibles: 4, Prix: 20 };
     Trajet.create.mockResolvedValue({ ...trajetData, id: 1 });
     req.body = trajetData;
@@ -47,7 +47,7 @@ describe('Trajet Controller', () => {
     expect(res.json).toHaveBeenCalledWith({ ...trajetData, id: 1 });
   });
 
-  it('should handle errors when creating a new trajet', async () => {
+  it('devrait gérer les erreurs lors de la création d un nouveau trajet', async () => {
     const errorMessage = 'Error creating trajet';
     Trajet.create.mockRejectedValue(new Error(errorMessage));
     req.body = {};
@@ -59,7 +59,7 @@ describe('Trajet Controller', () => {
     expect(res.json).toHaveBeenCalledWith({ message: errorMessage });
   });
 
-  it('should fetch all trajets', async () => {
+  it('devrait récupérer tous les trajets', async () => {
     const trajets = [{ id: 1, Depart: 'A', Arrivee: 'B' }];
     Trajet.findAll.mockResolvedValue(trajets);
 
@@ -70,7 +70,7 @@ describe('Trajet Controller', () => {
     expect(res.json).toHaveBeenCalledWith(trajets);
   });
 
-  it('should handle errors when fetching all trajets', async () => {
+  it('devrait gérer les erreurs lors de la récupération de tous les trajets', async () => {
     const errorMessage = 'Error fetching trajets';
     Trajet.findAll.mockRejectedValue(new Error(errorMessage));
 
@@ -81,7 +81,7 @@ describe('Trajet Controller', () => {
     expect(res.json).toHaveBeenCalledWith({ message: errorMessage });
   });
 
-  it('should fetch a trajet by ID', async () => {
+  it('devrait aller chercher un trajet par ID', async () => {
     const trajet = { id: 1, Depart: 'A', Arrivee: 'B' };
     Trajet.findByPk.mockResolvedValue(trajet);
     req.params.id = 1;
@@ -93,7 +93,7 @@ describe('Trajet Controller', () => {
     expect(res.json).toHaveBeenCalledWith(trajet);
   });
 
-  it('should return 404 if trajet not found by ID', async () => {
+  it('devrait retourner 404 si le trajet n est pas trouvé par ID', async () => {
     Trajet.findByPk.mockResolvedValue(null);
     req.params.id = 1;
 
@@ -104,7 +104,7 @@ describe('Trajet Controller', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'Trajet non trouvé' });
   });
 
-  it('should handle errors when fetching a trajet by ID', async () => {
+  it('devrait gérer les erreurs lors de la récupération d un trajet par ID', async () => {
     const errorMessage = 'Error fetching trajet';
     Trajet.findByPk.mockRejectedValue(new Error(errorMessage));
     req.params.id = 1;
@@ -116,7 +116,7 @@ describe('Trajet Controller', () => {
     expect(res.json).toHaveBeenCalledWith({ message: errorMessage });
   });
 
-  it('should update a trajet by ID', async () => {
+  it('devrait mettre à jour un trajet par ID', async () => {
     const updatedTrajetData = { Depart: 'C', Arrivee: 'D', DateHeure: '2022-12-13', PlacesDisponibles: 3, Prix: 30 };
     Trajet.findByPk.mockResolvedValue(mockTrajet);
     req.params.id = 1;
@@ -130,7 +130,7 @@ describe('Trajet Controller', () => {
     expect(res.json).toHaveBeenCalledWith(mockTrajet);
   });
 
-  it('should return 404 if trajet to update not found', async () => {
+  it('devrait renvoyer 404 si le trajet à mettre à jour est introuvable', async () => {
     Trajet.findByPk.mockResolvedValue(null);
     req.params.id = 1;
     req.body = { Depart: 'C', Arrivee: 'D' };
@@ -142,7 +142,7 @@ describe('Trajet Controller', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'Trajet non trouvé' });
   });
 
-  it('should handle errors when updating a trajet by ID', async () => {
+  it('devrait gérer les erreurs lors de la mise à jour d un trajet par ID', async () => {
     const errorMessage = 'Error updating trajet';
     Trajet.findByPk.mockRejectedValue(new Error(errorMessage));
     req.params.id = 1;
@@ -155,7 +155,7 @@ describe('Trajet Controller', () => {
     expect(res.json).toHaveBeenCalledWith({ message: errorMessage });
   });
 
-  it('should delete a trajet by ID', async () => {
+  it('devrait supprimer un trajet par ID', async () => {
     Trajet.findByPk.mockResolvedValue(mockTrajet);
     req.params.id = 1;
 
@@ -167,7 +167,7 @@ describe('Trajet Controller', () => {
     expect(res.json).toHaveBeenCalled();
   });
 
-  it('should return 404 if trajet to delete not found', async () => {
+  it('devrait renvoyer 404 si le trajet à supprimer est introuvable', async () => {
     Trajet.findByPk.mockResolvedValue(null);
     req.params.id = 1;
 
@@ -178,7 +178,7 @@ describe('Trajet Controller', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'Trajet non trouvé' });
   });
 
-  it('should handle errors when deleting a trajet by ID', async () => {
+  it('devrait gérer les erreurs lors de la suppression d un trajet par ID', async () => {
     const errorMessage = 'Error deleting trajet';
     Trajet.findByPk.mockRejectedValue(new Error(errorMessage));
     req.params.id = 1;

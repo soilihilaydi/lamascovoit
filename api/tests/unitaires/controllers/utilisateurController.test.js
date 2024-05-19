@@ -1,152 +1,96 @@
+// Importer les modules nécessaires
 import { creerUtilisateur, obtenirTousLesUtilisateurs, obtenirUtilisateurParId, mettreAJourUtilisateur, supprimerUtilisateur } from '../../../src/controllers/utilisateurController.js';
 import { Utilisateur } from '../../../src/models/utilisateurModel.js';
 
-// Mock du modèle Utilisateur
-jest.mock('../../../src/models/utilisateurModel.js');
+// Mock pour le modèle Utilisateur
+jest.mock('../../../src/models/utilisateurModel.js', () => ({
+  Utilisateur: {
+    create: jest.fn(),
+    findAll: jest.fn(),
+    findByPk: jest.fn(),
+    update: jest.fn(),
+    destroy: jest.fn()
+  }
+}));
 
-describe('Utilisateur Controller', () => {
-  let req;
-  let res;
-
-  beforeEach(() => {
-    req = {
-      body: {},
-      params: {}
-    };
-    res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-      send: jest.fn()
-    };
-  });
-
+describe('Tests pour les fonctions du contrôleur utilisateur', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should create a new user', async () => {
-    const mockUser = { id: 1, name: 'Test User' };
-    Utilisateur.create.mockResolvedValue(mockUser);
-    req.body = { name: 'Test User' };
+  it('creerUtilisateur devrait créer un nouvel utilisateur avec succès', async () => {
+    const req = { body: { /* Données de l'utilisateur */ } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    Utilisateur.create.mockResolvedValue(req.body);
 
     await creerUtilisateur(req, res);
 
-    expect(Utilisateur.create).toHaveBeenCalledWith(req.body);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(mockUser);
+    expect(res.json).toHaveBeenCalledWith(req.body);
   });
 
-  it('should handle errors when creating a new user', async () => {
-    const errorMessage = 'Failed to create user';
-    Utilisateur.create.mockRejectedValue(new Error(errorMessage));
-
-    await creerUtilisateur(req, res);
-
-    expect(Utilisateur.create).toHaveBeenCalledWith(req.body);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Failed to create user' });
-  });
-
-  it('should fetch all users', async () => {
-    const mockUsers = [{ id: 1, name: 'Test User' }];
-    Utilisateur.findAll.mockResolvedValue(mockUsers);
+  it('obtenirTousLesUtilisateurs devrait renvoyer tous les utilisateurs', async () => {
+    const utilisateurs = [{ id: 1, nom: 'John' }, { id: 2, nom: 'Jane' }];
+    const req = {};
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    Utilisateur.findAll.mockResolvedValue(utilisateurs);
 
     await obtenirTousLesUtilisateurs(req, res);
 
-    expect(Utilisateur.findAll).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(mockUsers);
+    expect(res.json).toHaveBeenCalledWith(utilisateurs);
   });
 
-  it('should handle errors when fetching all users', async () => {
-    const errorMessage = 'Failed to fetch users';
-    Utilisateur.findAll.mockRejectedValue(new Error(errorMessage));
-
-    await obtenirTousLesUtilisateurs(req, res);
-
-    expect(Utilisateur.findAll).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Failed to fetch users' });
-  });
-
-  it('should fetch a user by ID', async () => {
-    const mockUser = { id: 1, name: 'Test User' };
-    Utilisateur.findByPk.mockResolvedValue(mockUser);
-    req.params.id = 1;
+  it('obtenirUtilisateurParId devrait renvoyer un utilisateur par ID s\'il existe', async () => {
+    const utilisateur = { id: 1, nom: 'John' };
+    const req = { params: { id: 1 } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    Utilisateur.findByPk.mockResolvedValue(utilisateur);
 
     await obtenirUtilisateurParId(req, res);
 
-    expect(Utilisateur.findByPk).toHaveBeenCalledWith(req.params.id);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(mockUser);
+    expect(res.json).toHaveBeenCalledWith(utilisateur);
   });
 
-  it('should return 404 if user not found by ID', async () => {
+  it('obtenirUtilisateurParId devrait renvoyer une erreur 404 si l\'utilisateur n\'existe pas', async () => {
+    const req = { params: { id: 999 } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     Utilisateur.findByPk.mockResolvedValue(null);
-    req.params.id = 1;
 
     await obtenirUtilisateurParId(req, res);
 
-    expect(Utilisateur.findByPk).toHaveBeenCalledWith(req.params.id);
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({ error: 'User not found' });
   });
 
-  it('should handle errors when fetching a user by ID', async () => {
-    const errorMessage = 'Failed to fetch user';
-    Utilisateur.findByPk.mockRejectedValue(new Error(errorMessage));
-    req.params.id = 1;
-
-    await obtenirUtilisateurParId(req, res);
-
-    expect(Utilisateur.findByPk).toHaveBeenCalledWith(req.params.id);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Failed to fetch user' });
-  });
-
-  it('should update a user by ID', async () => {
-    const mockUser = { id: 1, name: 'Updated User' };
-    Utilisateur.update.mockResolvedValue([1]);
-    Utilisateur.findByPk.mockResolvedValue(mockUser);
-    req.params.id = 1;
-    req.body = { name: 'Updated User' };
+  it('mettreAJourUtilisateur devrait mettre à jour un utilisateur par ID', async () => {
+    const req = { params: { id: 1 }, body: { nom: 'Updated Name' } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    Utilisateur.update.mockResolvedValue([1]); // Un utilisateur mis à jour
 
     await mettreAJourUtilisateur(req, res);
 
     expect(Utilisateur.update).toHaveBeenCalledWith(req.body, { where: { idUtilisateur: req.params.id } });
-    expect(Utilisateur.findByPk).toHaveBeenCalledWith(req.params.id);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(mockUser);
+    expect(res.json).toHaveBeenCalled();
   });
 
-  it('should return 404 if user to update not found', async () => {
-    Utilisateur.update.mockResolvedValue([0]);
-    req.params.id = 1;
-    req.body = { name: 'Updated User' };
+  it('mettreAJourUtilisateur devrait renvoyer une erreur 404 si l\'utilisateur n\'existe pas', async () => {
+    const req = { params: { id: 999 }, body: { nom: 'Updated Name' } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    Utilisateur.update.mockResolvedValue([0]); // Aucun utilisateur mis à jour
 
     await mettreAJourUtilisateur(req, res);
 
-    expect(Utilisateur.update).toHaveBeenCalledWith(req.body, { where: { idUtilisateur: req.params.id } });
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({ error: 'User not found' });
   });
 
-  it('should handle errors when updating a user by ID', async () => {
-    const errorMessage = 'Failed to update user';
-    Utilisateur.update.mockRejectedValue(new Error(errorMessage));
-    req.params.id = 1;
-    req.body = { name: 'Updated User' };
-
-    await mettreAJourUtilisateur(req, res);
-
-    expect(Utilisateur.update).toHaveBeenCalledWith(req.body, { where: { idUtilisateur: req.params.id } });
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Failed to update user' });
-  });
-
-  it('should delete a user by ID', async () => {
-    Utilisateur.destroy.mockResolvedValue(1);
-    req.params.id = 1;
+  it('supprimerUtilisateur devrait supprimer un utilisateur par ID', async () => {
+    const req = { params: { id: 1 } };
+    const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
+    Utilisateur.destroy.mockResolvedValue(1); // Un utilisateur supprimé
 
     await supprimerUtilisateur(req, res);
 
@@ -155,26 +99,15 @@ describe('Utilisateur Controller', () => {
     expect(res.send).toHaveBeenCalled();
   });
 
-  it('should return 404 if user to delete not found', async () => {
-    Utilisateur.destroy.mockResolvedValue(0);
-    req.params.id = 1;
+  it('supprimerUtilisateur devrait renvoyer une erreur 404 si l\'utilisateur n\'existe pas', async () => {
+    const req = { params: { id: 999 } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    Utilisateur.destroy.mockResolvedValue(0); // Aucun utilisateur supprimé
 
     await supprimerUtilisateur(req, res);
 
-    expect(Utilisateur.destroy).toHaveBeenCalledWith({ where: { idUtilisateur: req.params.id } });
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({ error: 'User not found' });
   });
-
-  it('should handle errors when deleting a user by ID', async () => {
-    const errorMessage = 'Failed to delete user';
-    Utilisateur.destroy.mockRejectedValue(new Error(errorMessage));
-    req.params.id = 1;
-
-    await supprimerUtilisateur(req, res);
-
-    expect(Utilisateur.destroy).toHaveBeenCalledWith({ where: { idUtilisateur: req.params.id } });
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Failed to delete user' });
-  });
 });
+

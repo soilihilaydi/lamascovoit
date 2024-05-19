@@ -6,7 +6,7 @@ describe('Trajet Model', () => {
     try {
       await sequelize.sync({ force: true });
     } catch (error) {
-      console.error('Error syncing database:', error);
+      console.error('Erreur de synchronisation de la base de données :', error);
     }
   });
 
@@ -19,11 +19,11 @@ describe('Trajet Model', () => {
     try {
       await sequelize.close();
     } catch (error) {
-      console.error('Error closing database connection:', error);
+      console.error('Erreur lors de la fermeture de la connexion à la base de données :', error);
     }
   });
 
-  it('should create a new trajet with valid data', async () => {
+  it('devrait créer un nouveau trajet avec des données valides', async () => {
     const trajetData = {
       Depart: 'Paris',
       Arrivee: 'Lyon',
@@ -44,12 +44,12 @@ describe('Trajet Model', () => {
       expect(newTrajet.Prix).toBe(trajetData.Prix);
     } catch (error) {
       // Gérer les erreurs
-      console.error('Error creating trajet:', error);
+      console.error('Erreur lors de la création du trajet :', error);
       throw error; // Remonter l'erreur pour échouer le test
     }
   });
 
-  it('should fail to create a new trajet with invalid data', async () => {
+  it('ne devrait pas réussir à créer un nouveau trajet avec des données invalides', async () => {
     const invalidTrajetData = {
       Depart: null, // Champ obligatoire manquant
       Arrivee: 'Lyon',
