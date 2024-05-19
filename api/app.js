@@ -14,8 +14,10 @@ app.use(express.json());
 // Middleware d'authentification
 app.use(authMiddleware);
 
-// les routes 
+// Routes des utilisateurs
 app.use('/api', utilisateurRoutes);
+
+// Routes des trajets
 
 
 export default app;
