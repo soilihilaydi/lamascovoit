@@ -1,4 +1,4 @@
-import Trajet from '../src/models/trajetModel.js';
+import Trajet from '../models/trajetModel.js';
 
 // Créer un nouveau trajet
 export const createTrajet = async (req, res) => {
