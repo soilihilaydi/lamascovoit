@@ -15,5 +15,6 @@ export default {
       JWT_SECRET: 'testsecret',
     },
   },
+  moduleFileExtensions: ['js'],
   verbose: true,
 };
