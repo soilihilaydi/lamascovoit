@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.config.js';
-import Utilisateur from './utilisateurModel.js'; // Importation correcte
+import Utilisateur from './utilisateurModel.js';
 import Trajet from './trajetModel.js';
 
 const Reservation = sequelize.define('Reservation', {
@@ -8,6 +8,18 @@ const Reservation = sequelize.define('Reservation', {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
+  },
+  idUtilisateur: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  idTrajet: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  DateReservation: {
+    type: DataTypes.DATE,
+    allowNull: false
   },
   Status: {
     type: DataTypes.STRING,
