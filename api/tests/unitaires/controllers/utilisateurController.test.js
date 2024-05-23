@@ -3,7 +3,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import { register, login, getProfile, updateProfile } from '../../../src/controllers/utilisateurController.js';
 import jwt from 'jsonwebtoken';
-import { Utilisateur } from '../../../src/models/utilisateurModel.js';
+import Utilisateur from '../../../src/models/utilisateurModel.js'; // Correction ici
 
 // Mock JWT verification middleware
 jest.mock('../../../src/middlewares/authMiddleware.js', () => ({
@@ -15,11 +15,10 @@ jest.mock('../../../src/middlewares/authMiddleware.js', () => ({
 
 // Mock Utilisateur model
 jest.mock('../../../src/models/utilisateurModel.js', () => ({
-  Utilisateur: {
-    create: jest.fn(),
-    findOne: jest.fn(),
-    findByPk: jest.fn(),
-  },
+  create: jest.fn(),
+  findOne: jest.fn(),
+  findByPk: jest.fn(),
+  update: jest.fn(),
 }));
 
 const app = express();
@@ -36,6 +35,10 @@ app.put('/api/profile', (req, res, next) => {
 }, updateProfile);
 
 describe('Utilisateur Controller', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('POST /api/inscription devrait enregistrer un utilisateur', async () => {
     Utilisateur.create.mockResolvedValue({ idUtilisateur: 1, Email: 'test@example.com' });
     const response = await request(app)
@@ -46,7 +49,7 @@ describe('Utilisateur Controller', () => {
     expect(response.body.message).toBe('Utilisateur enregistré');
   });
 
-  test('POST /api/ connexion doit connecter un utilisateur', async () => {
+  test('POST /api/connexion doit connecter un utilisateur', async () => {
     const hashedPassword = await bcrypt.hash('password123', 10);
     Utilisateur.findOne.mockResolvedValue({ idUtilisateur: 1, Email: 'test@example.com', MotDePasse: hashedPassword });
     const response = await request(app)

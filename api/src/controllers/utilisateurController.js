@@ -1,4 +1,4 @@
-import { Utilisateur } from '../models/utilisateurModel.js';
+import Utilisateur from '../models/utilisateurModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -10,6 +10,7 @@ export const register = async (req, res) => {
     const newUser = await Utilisateur.create({ Email, MotDePasse: hashedPassword });
     res.status(201).json({ message: 'Utilisateur enregistré', user: newUser });
   } catch (error) {
+    console.error('Erreur lors de l\'enregistrement de l\'utilisateur:', error); // Ajoutez ce log
     res.status(500).json({ message: 'Erreur lors de l\'enregistrement de l\'utilisateur', error });
   }
 };
@@ -25,6 +26,7 @@ export const login = async (req, res) => {
     const token = jwt.sign({ id: user.idUtilisateur }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ token });
   } catch (error) {
+    console.error('Erreur lors de la connexion de l\'utilisateur:', error); // Ajoutez ce log
     res.status(500).json({ message: 'Erreur lors de la connexion de l\'utilisateur', error });
   }
 };
@@ -38,6 +40,7 @@ export const getProfile = async (req, res) => {
     }
     res.status(200).json(user);
   } catch (error) {
+    console.error('Erreur lors de la récupération du profil:', error); // Ajoutez ce log
     res.status(500).json({ message: 'Erreur lors de la récupération du profil', error });
   }
 };
@@ -52,10 +55,10 @@ export const updateProfile = async (req, res) => {
     await user.update(req.body);
     res.status(200).json({ message: 'Profil mis à jour', user });
   } catch (error) {
+    console.error('Erreur lors de la mise à jour du profil:', error); // Ajoutez ce log
     res.status(500).json({ message: 'Erreur lors de la mise à jour du profil', error });
   }
 };
-
 
 
 

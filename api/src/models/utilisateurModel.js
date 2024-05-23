@@ -1,4 +1,3 @@
-// utilisateurModel.js
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.config.js';
 
@@ -36,4 +35,4 @@ const Utilisateur = sequelize.define('Utilisateur', {
   timestamps: true
 });
 
-export { Utilisateur, sequelize };
+export default Utilisateur; // Utilisation d'une exportation par défaut
