@@ -9,38 +9,28 @@ const Utilisateur = sequelize.define('Utilisateur', {
     autoIncrement: true
   },
   Email: {
-    type: DataTypes.STRING(100),
-    allowNull: false,
-    unique: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   MotDePasse: {
-    type: DataTypes.STRING(255),
+    type: DataTypes.STRING,
     allowNull: false
   },
   Nom: {
-    type: DataTypes.STRING(100),
+    type: DataTypes.STRING,
     allowNull: false
   },
   Adresse: {
-    type: DataTypes.STRING(255)
+    type: DataTypes.STRING
   },
   NuméroDeTéléphone: {
-    type: DataTypes.STRING(20)
+    type: DataTypes.STRING
   },
   PhotoUrl: {
-    type: DataTypes.STRING(255)
+    type: DataTypes.STRING
   },
   Rôle: {
-    type: DataTypes.STRING(50),
-    defaultValue: 'utilisateur'
-  },
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: false
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    allowNull: false
+    type: DataTypes.STRING
   }
 }, {
   timestamps: true

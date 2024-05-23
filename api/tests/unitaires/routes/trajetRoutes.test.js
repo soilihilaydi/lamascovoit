@@ -1,14 +1,22 @@
 import request from 'supertest';
 import express from 'express';
-import trajetRoutes from '../../../src/routes/trajetRoutes.js'; // Assurez-vous que le chemin est correct
+import trajetRoutes from '../../../src/routes/trajetRoutes.js';
+import Trajet from '../../../src/models/trajetModel.js';
+import { verifyToken } from '../../../src/middlewares/authMiddleware.js';
 
-// Mock des fonctions du contrôleur
-jest.mock('../../../src/controllers/trajetController.js', () => ({
-  createTrajet: jest.fn((req, res) => res.status(201).send('Trajet created')),
-  getAllTrajets: jest.fn((req, res) => res.status(200).send('All trajets')),
-  getTrajetById: jest.fn((req, res) => res.status(200).send('Trajet by ID')),
-  updateTrajet: jest.fn((req, res) => res.status(200).send('Trajet updated')),
-  deleteTrajet: jest.fn((req, res) => res.status(200).send('Trajet deleted')),
+jest.mock('../../../src/middlewares/authMiddleware.js', () => ({
+  verifyToken: (req, res, next) => {
+    req.userId = 1;
+    next();
+  },
+}));
+
+jest.mock('../../../src/models/trajetModel.js', () => ({
+  create: jest.fn(),
+  findAll: jest.fn(),
+  findByPk: jest.fn(),
+  update: jest.fn(),
+  destroy: jest.fn(),
 }));
 
 const app = express();
@@ -16,33 +24,65 @@ app.use(express.json());
 app.use('/api/trajets', trajetRoutes);
 
 describe('Trajet Routes', () => {
-  it('devrait créer un nouveau trajet', async () => {
-    const res = await request(app).post('/api/trajets').send({ name: 'Test Trajet' });
-    expect(res.statusCode).toEqual(201);
-    expect(res.text).toEqual('Trajet created');
+  test('POST /api/trajets devrait créer un trajet', async () => {
+    Trajet.create.mockResolvedValue({ idTrajet: 1, Départ: 'Paris', Arrivée: 'Lyon', DateHeure: new Date(), PlacesDisponibles: 3, Prix: 50 });
+    const response = await request(app)
+      .post('/api/trajets')
+      .send({ Départ: 'Paris', Arrivée: 'Lyon', DateHeure: new Date(), PlacesDisponibles: 3, Prix: 50 });
+
+    expect(response.status).toBe(201);
+    expect(response.body.message).toBe('Trajet créé');
   });
 
-  it('devrait avoir tous les trajets', async () => {
-    const res = await request(app).get('/api/trajets');
-    expect(res.statusCode).toEqual(200);
-    expect(res.text).toEqual('All trajets');
+  test('GET /api/trajets devrait obtenir tous les trajets', async () => {
+    Trajet.findAll.mockResolvedValue([{ idTrajet: 1, Départ: 'Paris', Arrivée: 'Lyon', DateHeure: new Date(), PlacesDisponibles: 3, Prix: 50 }]);
+    const response = await request(app).get('/api/trajets');
+
+    expect(response.status).toBe(200);
+    expect(response.body.length).toBe(1);
   });
 
-  it('devrait obtenir un trajet par ID', async () => {
-    const res = await request(app).get('/api/trajets/1');
-    expect(res.statusCode).toEqual(200);
-    expect(res.text).toEqual('Trajet by ID');
+  test('GET /api/trajets/:id devrait obtenir un trajet unique', async () => {
+    Trajet.findByPk.mockResolvedValue({ idTrajet: 1, Départ: 'Paris', Arrivée: 'Lyon', DateHeure: new Date(), PlacesDisponibles: 3, Prix: 50 });
+    const response = await request(app).get('/api/trajets/1');
+
+    expect(response.status).toBe(200);
+    expect(response.body.Départ).toBe('Paris');
   });
 
-  it('devrait mettre à jour un trajet', async () => {
-    const res = await request(app).put('/api/trajets/1').send({ name: 'Updated Trajet' });
-    expect(res.statusCode).toEqual(200);
-    expect(res.text).toEqual('Trajet updated');
+  test('PUT /api/trajets/:id devrait mettre à jour un trajet', async () => {
+    const trajet = {
+      idTrajet: 1,
+      Départ: 'Paris',
+      Arrivée: 'Lyon',
+      DateHeure: new Date(),
+      PlacesDisponibles: 3,
+      Prix: 50,
+      update: jest.fn().mockResolvedValue(true),
+    };
+    Trajet.findByPk.mockResolvedValue(trajet);
+    const response = await request(app)
+      .put('/api/trajets/1')
+      .send({ Départ: 'Marseille' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Trajet mis à jour');
   });
 
-  it('devrait supprimer un trajet', async () => {
-    const res = await request(app).delete('/api/trajets/1');
-    expect(res.statusCode).toEqual(200);
-    expect(res.text).toEqual('Trajet deleted');
+  test('DELETE /api/trajets/:id devrait supprimer un trajet', async () => {
+    const trajet = {
+      idTrajet: 1,
+      Départ: 'Paris',
+      Arrivée: 'Lyon',
+      DateHeure: new Date(),
+      PlacesDisponibles: 3,
+      Prix: 50,
+      destroy: jest.fn().mockResolvedValue(true),
+    };
+    Trajet.findByPk.mockResolvedValue(trajet);
+    const response = await request(app).delete('/api/trajets/1');
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Trajet supprimé');
   });
 });

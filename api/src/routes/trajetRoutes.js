@@ -1,19 +1,15 @@
 import express from 'express';
-import {
-  createTrajet,
-  getAllTrajets,
-  getTrajetById,
-  updateTrajet,
-  deleteTrajet
-} from '../controllers/trajetController.js';
+import { createTrajet, getTrajets, getTrajet, updateTrajet, deleteTrajet } from '../controllers/trajetController.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', createTrajet);
-router.get('/', getAllTrajets);
-router.get('/:id', getTrajetById);
-router.put('/:id', updateTrajet);
-router.delete('/:id', deleteTrajet);
+router.post('/', verifyToken, createTrajet);
+router.get('/', getTrajets);
+router.get('/:id', getTrajet);
+router.put('/:id', verifyToken, updateTrajet);
+router.delete('/:id', verifyToken, deleteTrajet);
 
 export default router;
+
 

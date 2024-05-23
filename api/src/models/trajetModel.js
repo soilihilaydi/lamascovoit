@@ -10,11 +10,11 @@ const Trajet = sequelize.define('Trajet', {
     autoIncrement: true,
     allowNull: false
   },
-  Depart: {
+  Départ: { // Correction ici
     type: DataTypes.STRING(100),
     allowNull: false
   },
-  Arrivee: {
+  Arrivée: { // Correction ici
     type: DataTypes.STRING(100),
     allowNull: false
   },

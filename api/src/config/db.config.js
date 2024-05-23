@@ -1,9 +1,9 @@
-import Sequelize from 'sequelize';
+import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const env = process.env.NODE_ENV || 'development'; // Déterminez l'environnement actuel
+const env = process.env.NODE_ENV || 'test'; // Déterminez l'environnement actuel
 
 const config = {
   development: {

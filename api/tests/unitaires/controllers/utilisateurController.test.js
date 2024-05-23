@@ -1,113 +1,88 @@
-// Importer les modules nécessaires
-import { creerUtilisateur, obtenirTousLesUtilisateurs, obtenirUtilisateurParId, mettreAJourUtilisateur, supprimerUtilisateur } from '../../../src/controllers/utilisateurController.js';
+import request from 'supertest';
+import express from 'express';
+import bcrypt from 'bcrypt';
+import { register, login, getProfile, updateProfile } from '../../../src/controllers/utilisateurController.js';
+import jwt from 'jsonwebtoken';
 import { Utilisateur } from '../../../src/models/utilisateurModel.js';
 
-// Mock pour le modèle Utilisateur
+// Mock JWT verification middleware
+jest.mock('../../../src/middlewares/authMiddleware.js', () => ({
+  verifyToken: (req, res, next) => {
+    req.userId = 1; // Mocked user ID
+    next();
+  },
+}));
+
+// Mock Utilisateur model
 jest.mock('../../../src/models/utilisateurModel.js', () => ({
   Utilisateur: {
     create: jest.fn(),
-    findAll: jest.fn(),
+    findOne: jest.fn(),
     findByPk: jest.fn(),
-    update: jest.fn(),
-    destroy: jest.fn()
-  }
+  },
 }));
 
-describe('Tests pour les fonctions du contrôleur utilisateur', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
+const app = express();
+app.use(express.json());
+app.post('/api/register', register);
+app.post('/api/login', login);
+app.get('/api/profile', (req, res, next) => {
+  req.userId = 1; // Mocked user ID
+  next();
+}, getProfile);
+app.put('/api/profile', (req, res, next) => {
+  req.userId = 1; // Mocked user ID
+  next();
+}, updateProfile);
+
+describe('Utilisateur Controller', () => {
+  test('POST /api/inscription devrait enregistrer un utilisateur', async () => {
+    Utilisateur.create.mockResolvedValue({ idUtilisateur: 1, Email: 'test@example.com' });
+    const response = await request(app)
+      .post('/api/register')
+      .send({ Email: 'test@example.com', MotDePasse: 'password123' });
+
+    expect(response.status).toBe(201);
+    expect(response.body.message).toBe('Utilisateur enregistré');
   });
 
-  it('creerUtilisateur devrait créer un nouvel utilisateur avec succès', async () => {
-    const req = { body: { /* Données de l'utilisateur */ } };
-    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    Utilisateur.create.mockResolvedValue(req.body);
+  test('POST /api/ connexion doit connecter un utilisateur', async () => {
+    const hashedPassword = await bcrypt.hash('password123', 10);
+    Utilisateur.findOne.mockResolvedValue({ idUtilisateur: 1, Email: 'test@example.com', MotDePasse: hashedPassword });
+    const response = await request(app)
+      .post('/api/login')
+      .send({ Email: 'test@example.com', MotDePasse: 'password123' });
 
-    await creerUtilisateur(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(req.body);
+    expect(response.status).toBe(200);
+    expect(response.body.token).toBeDefined(); // Vérifie que le token est défini
   });
 
-  it('obtenirTousLesUtilisateurs devrait renvoyer tous les utilisateurs', async () => {
-    const utilisateurs = [{ id: 1, nom: 'John' }, { id: 2, nom: 'Jane' }];
-    const req = {};
-    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    Utilisateur.findAll.mockResolvedValue(utilisateurs);
+  test('GET /api/profil devrait obtenir le profil utilisateur', async () => {
+    Utilisateur.findByPk.mockResolvedValue({ idUtilisateur: 1, Nom: 'Test User' });
+    const response = await request(app)
+      .get('/api/profile')
+      .set('Authorization', 'Bearer fake-jwt-token');
 
-    await obtenirTousLesUtilisateurs(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(utilisateurs);
+    expect(response.status).toBe(200);
+    expect(response.body.idUtilisateur).toBe(1);
+    expect(response.body.Nom).toBe('Test User'); // Assurez-vous que le champ Nom est correct
   });
 
-  it('obtenirUtilisateurParId devrait renvoyer un utilisateur par ID s\'il existe', async () => {
-    const utilisateur = { id: 1, nom: 'John' };
-    const req = { params: { id: 1 } };
-    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    Utilisateur.findByPk.mockResolvedValue(utilisateur);
+  test('PUT /api/profil doit mettre à jour le profil utilisateur', async () => {
+    const mockUser = {
+      idUtilisateur: 1,
+      Nom: 'Test User',
+      update: jest.fn().mockResolvedValue({ idUtilisateur: 1, Nom: 'Updated User' })
+    };
+    Utilisateur.findByPk.mockResolvedValue(mockUser);
 
-    await obtenirUtilisateurParId(req, res);
+    const response = await request(app)
+      .put('/api/profile')
+      .set('Authorization', 'Bearer fake-jwt-token')
+      .send({ Nom: 'Updated User' });
 
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(utilisateur);
-  });
-
-  it('obtenirUtilisateurParId devrait renvoyer une erreur 404 si l\'utilisateur n\'existe pas', async () => {
-    const req = { params: { id: 999 } };
-    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    Utilisateur.findByPk.mockResolvedValue(null);
-
-    await obtenirUtilisateurParId(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: 'User not found' });
-  });
-
-  it('mettreAJourUtilisateur devrait mettre à jour un utilisateur par ID', async () => {
-    const req = { params: { id: 1 }, body: { nom: 'Updated Name' } };
-    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    Utilisateur.update.mockResolvedValue([1]); // Un utilisateur mis à jour
-
-    await mettreAJourUtilisateur(req, res);
-
-    expect(Utilisateur.update).toHaveBeenCalledWith(req.body, { where: { idUtilisateur: req.params.id } });
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalled();
-  });
-
-  it('mettreAJourUtilisateur devrait renvoyer une erreur 404 si l\'utilisateur n\'existe pas', async () => {
-    const req = { params: { id: 999 }, body: { nom: 'Updated Name' } };
-    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    Utilisateur.update.mockResolvedValue([0]); // Aucun utilisateur mis à jour
-
-    await mettreAJourUtilisateur(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: 'User not found' });
-  });
-
-  it('supprimerUtilisateur devrait supprimer un utilisateur par ID', async () => {
-    const req = { params: { id: 1 } };
-    const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
-    Utilisateur.destroy.mockResolvedValue(1); // Un utilisateur supprimé
-
-    await supprimerUtilisateur(req, res);
-
-    expect(Utilisateur.destroy).toHaveBeenCalledWith({ where: { idUtilisateur: req.params.id } });
-    expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.send).toHaveBeenCalled();
-  });
-
-  it('supprimerUtilisateur devrait renvoyer une erreur 404 si l\'utilisateur n\'existe pas', async () => {
-    const req = { params: { id: 999 } };
-    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    Utilisateur.destroy.mockResolvedValue(0); // Aucun utilisateur supprimé
-
-    await supprimerUtilisateur(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: 'User not found' });
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Profil mis à jour');
+    expect(mockUser.update).toHaveBeenCalledWith({ Nom: 'Updated User' });
   });
 });
-

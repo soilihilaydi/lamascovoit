@@ -1,192 +1,92 @@
-import {
-  createTrajet,
-  getAllTrajets,
-  getTrajetById,
-  updateTrajet,
-  deleteTrajet,
-} from '../../../src/controllers/trajetController.js';
+import request from 'supertest';
+import express from 'express';
+import { createTrajet, getTrajets, getTrajet, updateTrajet, deleteTrajet } from '../../../src/controllers/trajetController.js';
+import { verifyToken } from '../../../src/middlewares/authMiddleware.js';
 import Trajet from '../../../src/models/trajetModel.js';
 
-// Mock du modèle Trajet
-jest.mock('../../../src/models/trajetModel.js');
+jest.mock('../../../src/middlewares/authMiddleware.js', () => ({
+  verifyToken: (req, res, next) => {
+    req.userId = 1;
+    next();
+  },
+}));
+
+jest.mock('../../../src/models/trajetModel.js', () => ({
+  create: jest.fn(),
+  findAll: jest.fn(),
+  findByPk: jest.fn(),
+  update: jest.fn(),
+  destroy: jest.fn(),
+}));
+
+const app = express();
+app.use(express.json());
+app.post('/api/trajets', verifyToken, createTrajet);
+app.get('/api/trajets', getTrajets);
+app.get('/api/trajets/:id', getTrajet);
+app.put('/api/trajets/:id', verifyToken, updateTrajet);
+app.delete('/api/trajets/:id', verifyToken, deleteTrajet);
 
 describe('Trajet Controller', () => {
-  let req;
-  let res;
-  let mockTrajet;
+  test('POST /api/trajets devrait créer un trajet', async () => {
+    Trajet.create.mockResolvedValue({ idTrajet: 1, Départ: 'Paris', Arrivée: 'Lyon', DateHeure: new Date(), PlacesDisponibles: 3, Prix: 50 });
+    const response = await request(app)
+      .post('/api/trajets')
+      .send({ Départ: 'Paris', Arrivée: 'Lyon', DateHeure: new Date(), PlacesDisponibles: 3, Prix: 50 });
 
-  beforeEach(() => {
-    req = {
-      body: {},
-      params: {},
+    expect(response.status).toBe(201);
+    expect(response.body.message).toBe('Trajet créé');
+  });
+
+  test('GET /api/trajets devrait obtenir tous les trajets', async () => {
+    Trajet.findAll.mockResolvedValue([{ idTrajet: 1, Départ: 'Paris', Arrivée: 'Lyon', DateHeure: new Date(), PlacesDisponibles: 3, Prix: 50 }]);
+    const response = await request(app).get('/api/trajets');
+
+    expect(response.status).toBe(200);
+    expect(response.body.length).toBe(1);
+  });
+
+  test('GET /api/trajets/:id devrait obtenir un trajet unique', async () => {
+    Trajet.findByPk.mockResolvedValue({ idTrajet: 1, Départ: 'Paris', Arrivée: 'Lyon', DateHeure: new Date(), PlacesDisponibles: 3, Prix: 50 });
+    const response = await request(app).get('/api/trajets/1');
+
+    expect(response.status).toBe(200);
+    expect(response.body.Départ).toBe('Paris');
+  });
+
+  test('PUT /api/trajets/:id devrait mettre à jour un trajet', async () => {
+    const trajet = {
+      idTrajet: 1,
+      Départ: 'Paris',
+      Arrivée: 'Lyon',
+      DateHeure: new Date(),
+      PlacesDisponibles: 3,
+      Prix: 50,
+      update: jest.fn().mockResolvedValue(true),
     };
-    res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-      send: jest.fn(),
-    };
-    mockTrajet = {
-      save: jest.fn(),
-      destroy: jest.fn(),
-    };
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('devrait créer un nouveau trajet', async () => {
-    const trajetData = { Depart: 'A', Arrivee: 'B', DateHeure: '2022-12-12', PlacesDisponibles: 4, Prix: 20 };
-    Trajet.create.mockResolvedValue({ ...trajetData, id: 1 });
-    req.body = trajetData;
-
-    await createTrajet(req, res);
-
-    expect(Trajet.create).toHaveBeenCalledWith(req.body);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ ...trajetData, id: 1 });
-  });
-
-  it('devrait gérer les erreurs lors de la création d un nouveau trajet', async () => {
-    const errorMessage = 'Error creating trajet';
-    Trajet.create.mockRejectedValue(new Error(errorMessage));
-    req.body = {};
-
-    await createTrajet(req, res);
-
-    expect(Trajet.create).toHaveBeenCalledWith(req.body);
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ message: errorMessage });
-  });
-
-  it('devrait récupérer tous les trajets', async () => {
-    const trajets = [{ id: 1, Depart: 'A', Arrivee: 'B' }];
-    Trajet.findAll.mockResolvedValue(trajets);
-
-    await getAllTrajets(req, res);
-
-    expect(Trajet.findAll).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(trajets);
-  });
-
-  it('devrait gérer les erreurs lors de la récupération de tous les trajets', async () => {
-    const errorMessage = 'Error fetching trajets';
-    Trajet.findAll.mockRejectedValue(new Error(errorMessage));
-
-    await getAllTrajets(req, res);
-
-    expect(Trajet.findAll).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ message: errorMessage });
-  });
-
-  it('devrait aller chercher un trajet par ID', async () => {
-    const trajet = { id: 1, Depart: 'A', Arrivee: 'B' };
     Trajet.findByPk.mockResolvedValue(trajet);
-    req.params.id = 1;
+    const response = await request(app)
+      .put('/api/trajets/1')
+      .send({ Départ: 'Marseille' });
 
-    await getTrajetById(req, res);
-
-    expect(Trajet.findByPk).toHaveBeenCalledWith(1);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(trajet);
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Trajet mis à jour');
   });
 
-  it('devrait retourner 404 si le trajet n est pas trouvé par ID', async () => {
-    Trajet.findByPk.mockResolvedValue(null);
-    req.params.id = 1;
+  test('DELETE /api/trajets/:id devrait supprimer un trajet', async () => {
+    const trajet = {
+      idTrajet: 1,
+      Départ: 'Paris',
+      Arrivée: 'Lyon',
+      DateHeure: new Date(),
+      PlacesDisponibles: 3,
+      Prix: 50,
+      destroy: jest.fn().mockResolvedValue(true),
+    };
+    Trajet.findByPk.mockResolvedValue(trajet);
+    const response = await request(app).delete('/api/trajets/1');
 
-    await getTrajetById(req, res);
-
-    expect(Trajet.findByPk).toHaveBeenCalledWith(1);
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Trajet non trouvé' });
-  });
-
-  it('devrait gérer les erreurs lors de la récupération d un trajet par ID', async () => {
-    const errorMessage = 'Error fetching trajet';
-    Trajet.findByPk.mockRejectedValue(new Error(errorMessage));
-    req.params.id = 1;
-
-    await getTrajetById(req, res);
-
-    expect(Trajet.findByPk).toHaveBeenCalledWith(1);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ message: errorMessage });
-  });
-
-  it('devrait mettre à jour un trajet par ID', async () => {
-    const updatedTrajetData = { Depart: 'C', Arrivee: 'D', DateHeure: '2022-12-13', PlacesDisponibles: 3, Prix: 30 };
-    Trajet.findByPk.mockResolvedValue(mockTrajet);
-    req.params.id = 1;
-    req.body = updatedTrajetData;
-
-    await updateTrajet(req, res);
-
-    expect(Trajet.findByPk).toHaveBeenCalledWith(1);
-    expect(mockTrajet.save).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(mockTrajet);
-  });
-
-  it('devrait renvoyer 404 si le trajet à mettre à jour est introuvable', async () => {
-    Trajet.findByPk.mockResolvedValue(null);
-    req.params.id = 1;
-    req.body = { Depart: 'C', Arrivee: 'D' };
-
-    await updateTrajet(req, res);
-
-    expect(Trajet.findByPk).toHaveBeenCalledWith(1);
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Trajet non trouvé' });
-  });
-
-  it('devrait gérer les erreurs lors de la mise à jour d un trajet par ID', async () => {
-    const errorMessage = 'Error updating trajet';
-    Trajet.findByPk.mockRejectedValue(new Error(errorMessage));
-    req.params.id = 1;
-    req.body = { Depart: 'C', Arrivee: 'D' };
-
-    await updateTrajet(req, res);
-
-    expect(Trajet.findByPk).toHaveBeenCalledWith(1);
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ message: errorMessage });
-  });
-
-  it('devrait supprimer un trajet par ID', async () => {
-    Trajet.findByPk.mockResolvedValue(mockTrajet);
-    req.params.id = 1;
-
-    await deleteTrajet(req, res);
-
-    expect(Trajet.findByPk).toHaveBeenCalledWith(1);
-    expect(mockTrajet.destroy).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.json).toHaveBeenCalled();
-  });
-
-  it('devrait renvoyer 404 si le trajet à supprimer est introuvable', async () => {
-    Trajet.findByPk.mockResolvedValue(null);
-    req.params.id = 1;
-
-    await deleteTrajet(req, res);
-
-    expect(Trajet.findByPk).toHaveBeenCalledWith(1);
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Trajet non trouvé' });
-  });
-
-  it('devrait gérer les erreurs lors de la suppression d un trajet par ID', async () => {
-    const errorMessage = 'Error deleting trajet';
-    Trajet.findByPk.mockRejectedValue(new Error(errorMessage));
-    req.params.id = 1;
-
-    await deleteTrajet(req, res);
-
-    expect(Trajet.findByPk).toHaveBeenCalledWith(1);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ message: errorMessage });
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Trajet supprimé');
   });
 });

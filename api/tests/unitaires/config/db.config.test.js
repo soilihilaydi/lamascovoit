@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import sequelize from '../../../src/config/db.config';
+import sequelize from '../../../src/config/db.config.js';
 
 dotenv.config({ path: '.env.test' });
 
@@ -13,11 +13,11 @@ describe('Database Configuration', () => {
       await sequelize.authenticate();
       console.log('Connection to the test database has been established successfully.');
     } catch (error) {
-      console.error('Impossible de se connecter à la base de données de test :', error);
+      console.error('Unable to connect to the test database:', error);
     }
   });
 
-  it('devrait avoir les variables d environnement correctes', () => {
+  it('devrait avoir des variables d environnement correctes', () => {
     expect(process.env.NODE_ENV).toBe('test');
     expect(process.env.TEST_DB_USER).toBeDefined();
     expect(process.env.TEST_DB_PASS).toBeDefined();
