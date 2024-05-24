@@ -1,25 +1,38 @@
 import { Sequelize } from 'sequelize';
-import sequelize from '../config/db.config.js';
-
+import dotenv from 'dotenv';
 import Utilisateur from './utilisateurModel.js';
+import Reservation from './reservationModel.js';
 import Trajet from './trajetModel.js';
 import Evaluation from './evaluationModel.js';
-import Reservation from './reservationModel.js';
 
-//  les associations 
-Utilisateur.hasMany(Reservation, { foreignKey: 'idUtilisateur' });
-Reservation.belongsTo(Utilisateur, { foreignKey: 'idUtilisateur' });
+dotenv.config();
 
-Utilisateur.hasMany(Trajet, { foreignKey: 'idUtilisateur' });
-Trajet.belongsTo(Utilisateur, { foreignKey: 'idUtilisateur' });
+const sequelize = new Sequelize(
+  process.env.TEST_DB_NAME,
+  process.env.TEST_DB_USER,
+  process.env.TEST_DB_PASS,
+  {
+    host: process.env.TEST_DB_HOST,
+    dialect: process.env.TEST_DB_DIALECT,
+  }
+);
 
-Utilisateur.hasMany(Evaluation, { foreignKey: 'idUtilisateur' });
-Evaluation.belongsTo(Utilisateur, { foreignKey: 'idUtilisateur' });
+const UtilisateurModel = Utilisateur(sequelize);
+const ReservationModel = Reservation(sequelize);
+const TrajetModel = Trajet(sequelize);
+const EvaluationModel = Evaluation(sequelize);
 
-Trajet.hasMany(Reservation, { foreignKey: 'idTrajet' });
-Reservation.belongsTo(Trajet, { foreignKey: 'idTrajet' });
+// Définir les associations
+UtilisateurModel.hasMany(ReservationModel, { foreignKey: 'idUtilisateur' });
+ReservationModel.belongsTo(UtilisateurModel, { foreignKey: 'idUtilisateur' });
 
-Trajet.hasMany(Evaluation, { foreignKey: 'idTrajet' });
-Evaluation.belongsTo(Trajet, { foreignKey: 'idTrajet' });
+UtilisateurModel.hasMany(TrajetModel, { foreignKey: 'idUtilisateur' });
+TrajetModel.belongsTo(UtilisateurModel, { foreignKey: 'idUtilisateur' });
 
-export { Utilisateur, Trajet, Evaluation, Reservation, sequelize };
+EvaluationModel.belongsTo(UtilisateurModel, { foreignKey: 'idUtilisateur' });
+EvaluationModel.belongsTo(TrajetModel, { foreignKey: 'idTrajet' });
+
+UtilisateurModel.hasMany(EvaluationModel, { foreignKey: 'idUtilisateur' });
+TrajetModel.hasMany(EvaluationModel, { foreignKey: 'idTrajet' });
+
+export { sequelize, UtilisateurModel, ReservationModel, TrajetModel, EvaluationModel };

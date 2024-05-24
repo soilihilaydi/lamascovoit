@@ -86,7 +86,7 @@ describe('Reservation Controller', () => {
     const mockReservation = { idReservation: 1, idUtilisateur: 1, idTrajet: 1, DateReservation: new Date().toISOString() };
     Reservation.findByPk.mockResolvedValue({
       ...mockReservation,
-      destroy: jest.fn().mockResolvedValue(1), // Mock de la méthode destroy
+      destroy: jest.fn().mockResolvedValue(1), 
     });
 
     const response = await request(app).delete('/api/reservations/1');

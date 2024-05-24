@@ -1,14 +1,15 @@
-import { Sequelize } from 'sequelize';
-import { Utilisateur, Trajet, Evaluation, sequelize } from '../../../src/models/index.js';
+import { sequelize, UtilisateurModel, TrajetModel, EvaluationModel } from '../../../src/models/index.js';
 
 describe('Evaluation Model', () => {
   beforeAll(async () => {
-    // Synchroniser les modèles pour s'assurer que les associations sont définies
+    // Désactiver les contraintes de clé étrangère temporairement
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
     await sequelize.sync({ force: true });
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
   });
 
   test('devrait avoir des propriétés correctes', () => {
-    const attributes = Evaluation.rawAttributes;
+    const attributes = EvaluationModel.rawAttributes;
 
     expect(attributes).toHaveProperty('idEvaluation');
     expect(attributes).toHaveProperty('Note');
@@ -18,7 +19,7 @@ describe('Evaluation Model', () => {
   });
 
   test('devrait avoir des associations correctes', () => {
-    expect(Evaluation.associations).toHaveProperty('Utilisateur');
-    expect(Evaluation.associations).toHaveProperty('Trajet');
+    expect(EvaluationModel.associations).toHaveProperty('Utilisateur');
+    expect(EvaluationModel.associations).toHaveProperty('Trajet');
   });
 });

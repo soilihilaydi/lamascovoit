@@ -1,42 +1,30 @@
-// src/models/evaluationModel.js
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db.config.js';
-import Utilisateur from './utilisateurModel.js';
-import Trajet from './trajetModel.js';
 
-const Evaluation = sequelize.define('Evaluation', {
-  idEvaluation: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  Note: {
-    type: DataTypes.FLOAT,
-    allowNull: false,
-  },
-  Commentaire: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
-  idUtilisateur: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: Utilisateur,
-      key: 'idUtilisateur',
+const Evaluation = (sequelize) => {
+  return sequelize.define('Evaluation', {
+    idEvaluation: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
     },
-  },
-  idTrajet: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: Trajet,
-      key: 'idTrajet',
+    Note: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
-  },
-}, {
-  timestamps: false,
-  tableName: 'Evaluations',
-});
-
-
+    Commentaire: {
+      type: DataTypes.STRING
+    },
+    idUtilisateur: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    idTrajet: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    }
+  }, {
+    timestamps: true
+  });
+};
 
 export default Evaluation;
