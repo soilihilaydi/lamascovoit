@@ -69,8 +69,10 @@ describe('Reservation Controller', () => {
 
   test('PUT /api/reservations/:id devrait mettre à jour une réservation', async () => {
     const mockReservation = { idReservation: 1, idUtilisateur: 1, idTrajet: 1, DateReservation: new Date().toISOString() };
-    Reservation.findByPk.mockResolvedValue(mockReservation);
-    Reservation.update.mockResolvedValue([1]);
+    Reservation.findByPk.mockResolvedValue({
+      ...mockReservation,
+      update: jest.fn().mockResolvedValue([1]), // Mock de la méthode update
+    });
 
     const response = await request(app)
       .put('/api/reservations/1')
@@ -82,8 +84,10 @@ describe('Reservation Controller', () => {
 
   test('DELETE /api/reservations/:id devrait supprimer une réservation', async () => {
     const mockReservation = { idReservation: 1, idUtilisateur: 1, idTrajet: 1, DateReservation: new Date().toISOString() };
-    Reservation.findByPk.mockResolvedValue(mockReservation);
-    Reservation.destroy.mockResolvedValue(1);
+    Reservation.findByPk.mockResolvedValue({
+      ...mockReservation,
+      destroy: jest.fn().mockResolvedValue(1), // Mock de la méthode destroy
+    });
 
     const response = await request(app).delete('/api/reservations/1');
 
@@ -100,3 +104,5 @@ describe('Reservation Controller', () => {
     expect(response.body.message).toBe('Réservation non trouvée');
   });
 });
+
+
