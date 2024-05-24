@@ -117,11 +117,8 @@ Le backend de l'application est organisé comme suit:
 
 
 
-<<<<<<< HEAD
-![Description alternative](./api/public/MCD.svg "MCD du site de coivoiturage local")
-=======
-![Description alternative](/api/public/MCD.svg "MCD du site de coivoituge local")
->>>>>>> 70e85b6 (rectification mise en place)
+![Description alternative](./api/docs/public/MCD.svg "MCD du site de coivoiturage local")
+
 
 - **commenter** (<ins>_#idUtilisateur_</ins>, <ins>_#idEvaluation_</ins>)
 - **concerner** (<ins>_#idTrajet_</ins>, <ins>_#idReservation_</ins>)
