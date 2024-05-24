@@ -2,7 +2,7 @@ import request from 'supertest';
 import express from 'express';
 import reservationRoutes from '../../../src/routes/reservationRoutes.js';
 import Reservation from '../../../src/models/reservationModel.js';
-import { verifyToken } from '../../../src/middlewares/authMiddleware.js';
+
 
 jest.mock('../../../src/middlewares/authMiddleware.js', () => ({
   verifyToken: (req, res, next) => {
