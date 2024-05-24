@@ -1,7 +1,6 @@
-// src/routes/evaluationRoutes.js
 import express from 'express';
 import { createEvaluation, getEvaluations, getEvaluationById, updateEvaluation, deleteEvaluation } from '../controllers/evaluationController.js';
-import verifyToken from '../middleware/authMiddleware.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 

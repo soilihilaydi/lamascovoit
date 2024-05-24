@@ -1,6 +1,6 @@
 // src/models/evaluationModel.js
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
+import sequelize from '../config/db.config.js';
 import Utilisateur from './utilisateurModel.js';
 import Trajet from './trajetModel.js';
 
