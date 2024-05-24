@@ -37,7 +37,6 @@ const Evaluation = sequelize.define('Evaluation', {
   tableName: 'Evaluations',
 });
 
-Evaluation.belongsTo(Utilisateur, { foreignKey: 'idUtilisateur' });
-Evaluation.belongsTo(Trajet, { foreignKey: 'idTrajet' });
+
 
 export default Evaluation;

@@ -21,7 +21,8 @@
     "express-validator": "^7.0.1",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.9.7",
-    "sequelize": "^6.37.3"
+    "sequelize": "^6.37.3",
+    "xss-clean": "^0.1.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.5",

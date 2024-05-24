@@ -29,11 +29,6 @@ const Reservation = sequelize.define('Reservation', {
   timestamps: true
 });
 
-// Associations
-Utilisateur.hasMany(Reservation, { foreignKey: 'idUtilisateur' });
-Reservation.belongsTo(Utilisateur, { foreignKey: 'idUtilisateur' });
 
-Trajet.hasMany(Reservation, { foreignKey: 'idTrajet' });
-Reservation.belongsTo(Trajet, { foreignKey: 'idTrajet' });
 
 export default Reservation;
