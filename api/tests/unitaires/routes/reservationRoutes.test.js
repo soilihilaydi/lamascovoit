@@ -24,7 +24,7 @@ app.use(express.json());
 app.use('/api/reservations', reservationRoutes);
 
 describe('Reservation Routes', () => {
-  test('POST /api/reservations should create a reservation', async () => {
+  test('POST /api/reservations devrait créer une réservation', async () => {
     Reservation.create.mockResolvedValue({ idReservation: 1, idUtilisateur: 1, idTrajet: 1, DateReservation: new Date() });
     const response = await request(app)
       .post('/api/reservations')
@@ -34,7 +34,7 @@ describe('Reservation Routes', () => {
     expect(response.body.message).toBe('Réservation créée');
   });
 
-  test('GET /api/reservations should get all reservations', async () => {
+  test('GET /api/reservations devrait obtenir toutes les réservations', async () => {
     Reservation.findAll.mockResolvedValue([{ idReservation: 1, idUtilisateur: 1, idTrajet: 1, DateReservation: new Date() }]);
     const response = await request(app).get('/api/reservations');
 
@@ -42,7 +42,7 @@ describe('Reservation Routes', () => {
     expect(response.body.length).toBe(1);
   });
 
-  test('GET /api/reservations/:id should get a single reservation', async () => {
+  test('GET /api/reservations/:id devrait recevoir une seule réservation', async () => {
     Reservation.findByPk.mockResolvedValue({ idReservation: 1, idUtilisateur: 1, idTrajet: 1, DateReservation: new Date() });
     const response = await request(app).get('/api/reservations/1');
 
@@ -50,7 +50,7 @@ describe('Reservation Routes', () => {
     expect(response.body.idReservation).toBe(1);
   });
 
-  test('PUT /api/reservations/:id should update a reservation', async () => {
+  test('PUT /api/reservations/:id devrait mettre à jour une réservation', async () => {
     const reservation = {
       idReservation: 1,
       idUtilisateur: 1,
@@ -67,7 +67,7 @@ describe('Reservation Routes', () => {
     expect(response.body.message).toBe('Réservation mise à jour');
   });
 
-  test('DELETE /api/reservations/:id should delete a reservation', async () => {
+  test('DELETE /api/reservations/:id devrait supprimer une réservation', async () => {
     const reservation = {
       idReservation: 1,
       idUtilisateur: 1,
