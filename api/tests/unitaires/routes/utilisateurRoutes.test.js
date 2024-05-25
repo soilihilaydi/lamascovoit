@@ -17,6 +17,7 @@ jest.mock('../../../src/controllers/utilisateurController.js', () => ({
   login: (req, res) => res.status(200).json({ token: 'fake-jwt-token' }),
   getProfile: (req, res) => res.status(200).json({ id: req.userId, name: 'Test User' }),
   updateProfile: (req, res) => res.status(200).json({ message: 'Profil mis à jour' }),
+  deleteProfile: (req, res) => res.status(200).json({ message: 'Profil supprimé avec succès' }),
 }));
 
 const app = express();
@@ -24,7 +25,7 @@ app.use(express.json());
 app.use('/api/utilisateur', router);
 
 describe('Utilisateur Routes', () => {
-  test('POST /api/utilisateur/s inscrire devrait enregistrer un utilisateur', async () => {
+  test('POST /api/utilisateur/register devrait enregistrer un utilisateur', async () => {
     const response = await request(app)
       .post('/api/utilisateur/register')
       .send({ username: 'testuser', password: 'password' });
@@ -33,7 +34,7 @@ describe('Utilisateur Routes', () => {
     expect(response.body.message).toBe('Utilisateur enregistré');
   });
 
-  test('POST /api/utilisateur/la connexion doit connecter un utilisateur', async () => {
+  test('POST /api/utilisateur/login devrait connecter un utilisateur', async () => {
     const response = await request(app)
       .post('/api/utilisateur/login')
       .send({ username: 'testuser', password: 'password' });
@@ -42,7 +43,7 @@ describe('Utilisateur Routes', () => {
     expect(response.body.token).toBe('fake-jwt-token');
   });
 
-  test('GET /api/utilisateur/le profil devrait obtenir le profil utilisateur', async () => {
+  test('GET /api/utilisateur/profile devrait obtenir le profil utilisateur', async () => {
     const response = await request(app)
       .get('/api/utilisateur/profile')
       .set('Authorization', 'Bearer fake-jwt-token');
@@ -52,7 +53,7 @@ describe('Utilisateur Routes', () => {
     expect(response.body.name).toBe('Test User');
   });
 
-  test('PUT /api/utilisateur/le profil doit mettre à jour le profil utilisateur', async () => {
+  test('PUT /api/utilisateur/profile devrait mettre à jour le profil utilisateur', async () => {
     const response = await request(app)
       .put('/api/utilisateur/profile')
       .set('Authorization', 'Bearer fake-jwt-token')
@@ -60,6 +61,15 @@ describe('Utilisateur Routes', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.message).toBe('Profil mis à jour');
+  });
+
+  test('DELETE /api/utilisateur/profile devrait supprimer le profil utilisateur', async () => {
+    const response = await request(app)
+      .delete('/api/utilisateur/profile')
+      .set('Authorization', 'Bearer fake-jwt-token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Profil supprimé avec succès');
   });
 });
 

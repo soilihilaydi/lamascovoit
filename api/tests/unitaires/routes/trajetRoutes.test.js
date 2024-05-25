@@ -2,7 +2,7 @@ import request from 'supertest';
 import express from 'express';
 import trajetRoutes from '../../../src/routes/trajetRoutes.js';
 import Trajet from '../../../src/models/trajetModel.js';
-import { verifyToken } from '../../../src/middlewares/authMiddleware.js';
+
 
 jest.mock('../../../src/middlewares/authMiddleware.js', () => ({
   verifyToken: (req, res, next) => {

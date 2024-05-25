@@ -17,7 +17,7 @@ const sequelize = new Sequelize(
   }
 );
 
-const UtilisateurModel = Utilisateur(sequelize);
+const UtilisateurModel = Utilisateur;
 const ReservationModel = Reservation(sequelize);
 const TrajetModel = Trajet(sequelize);
 const EvaluationModel = Evaluation(sequelize);
@@ -36,3 +36,4 @@ UtilisateurModel.hasMany(EvaluationModel, { foreignKey: 'idUtilisateur' });
 TrajetModel.hasMany(EvaluationModel, { foreignKey: 'idTrajet' });
 
 export { sequelize, UtilisateurModel, ReservationModel, TrajetModel, EvaluationModel };
+

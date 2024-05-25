@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const env = process.env.NODE_ENV || 'test'; // Déterminez l'environnement actuel
+const env = process.env.NODE_ENV || 'test'; 
 
 const config = {
   development: {

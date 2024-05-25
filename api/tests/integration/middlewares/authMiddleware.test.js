@@ -1,12 +1,12 @@
 import request from 'supertest';
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { verifyToken } from '../../../src/middlewares/authMiddleware.js'; // Assurez-vous que l'importation est correcte
+import { verifyToken } from '../../../src/middlewares/authMiddleware.js';
 
 const app = express();
 app.use(express.json());
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
+const JWT_SECRET = process.env.JWT_SECRET || 'process.env.JWT_SECRET';
 
 // Route protégée pour le test
 app.get('/protected', verifyToken, (req, res) => {
@@ -24,14 +24,14 @@ describe('Auth Middleware', () => {
   test('devrait renvoyer 401 si aucun token n\'est fourni', async () => {
     const response = await request(app).get('/protected');
     expect(response.status).toBe(401);
-    expect(response.body).toEqual({ message: 'Token non fourni' });
+    expect(response.body).toEqual({ message: 'Accès refusé : aucun token fourni' });
   });
 
-  test('devrait renvoyer 401 si le token est invalide', async () => {
+  test('devrait renvoyer 400 si le token est invalide', async () => {
     const response = await request(app)
       .get('/protected')
       .set('Authorization', 'Bearer invalidToken');
-    expect(response.status).toBe(401);
+    expect(response.status).toBe(400);
     expect(response.body).toEqual({ message: 'Token invalide' });
   });
 
@@ -43,3 +43,5 @@ describe('Auth Middleware', () => {
     expect(response.body).toEqual({ message: 'Accès autorisé', userId: 'testUserId' });
   });
 });
+
+

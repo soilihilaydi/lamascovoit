@@ -1,39 +1,30 @@
-import { Sequelize } from 'sequelize';
+import sequelize from '../../../src/config/db.config.js'; // Importation par défaut
 import Utilisateur from '../../../src/models/utilisateurModel.js';
 import dotenv from 'dotenv';
 
-dotenv.config(); // Charger les variables d'environnement
-
-// Initialisation de Sequelize avec les paramètres MySQL
-const sequelizeInstance = new Sequelize(
-  process.env.TEST_DB_NAME,
-  process.env.TEST_DB_USER,
-  process.env.TEST_DB_PASS,
-  {
-    host: process.env.TEST_DB_HOST,
-    dialect: process.env.TEST_DB_DIALECT,
-    logging: false, // Désactiver les logs SQL pour les tests
-  }
-);
-
-const UtilisateurModel = Utilisateur(sequelizeInstance);
+dotenv.config();
 
 describe('Utilisateur Model', () => {
   beforeAll(async () => {
     try {
-      await sequelizeInstance.authenticate();
+      await sequelize.authenticate();
       console.log('Connection has been established successfully.');
+
       // Désactiver les contraintes de clé étrangère temporairement
-      await sequelizeInstance.query('SET FOREIGN_KEY_CHECKS = 0');
-      await sequelizeInstance.sync({ force: true });
-      await sequelizeInstance.query('SET FOREIGN_KEY_CHECKS = 1');
+      await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+      await sequelize.sync({ force: true });
+      await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
     } catch (error) {
       console.error('Unable to connect to the database:', error);
     }
   });
 
+  afterAll(async () => {
+    await sequelize.close();
+  });
+
   it('devrait créer une nouvelle instance Utilisateur', async () => {
-    const utilisateur = UtilisateurModel.build({
+    const utilisateur = await Utilisateur.create({
       Email: 'test@example.com',
       MotDePasse: 'password123',
       Nom: 'John Doe',
@@ -51,5 +42,24 @@ describe('Utilisateur Model', () => {
     expect(utilisateur.PhotoUrl).toBe('http://example.com/photo.jpg');
     expect(utilisateur.Rôle).toBe('user');
   });
+
+  it('ne devrait pas créer un utilisateur avec un email en double', async () => {
+    try {
+      await Utilisateur.create({
+        Email: 'test@example.com', // Email en double
+        MotDePasse: 'password123',
+        Nom: 'Jane Doe',
+        Adresse: '456 Test Ave',
+        NuméroDeTéléphone: '0987654321',
+        PhotoUrl: 'http://example.com/photo2.jpg',
+        Rôle: 'admin'
+      });
+    } catch (error) {
+      expect(error).toBeDefined();
+      expect(error.name).toBe('SequelizeUniqueConstraintError');
+    }
+  });
 });
+
+
    

@@ -1,8 +1,7 @@
 import request from 'supertest';
 import express from 'express';
 import bcrypt from 'bcrypt';
-import { register, login, getProfile, updateProfile } from '../../../src/controllers/utilisateurController.js';
-import jwt from 'jsonwebtoken';
+import { register, login, getProfile, updateProfile, deleteProfile } from '../../../src/controllers/utilisateurController.js';
 import Utilisateur from '../../../src/models/utilisateurModel.js'; // Correction ici
 
 // Mock JWT verification middleware
@@ -19,6 +18,7 @@ jest.mock('../../../src/models/utilisateurModel.js', () => ({
   findOne: jest.fn(),
   findByPk: jest.fn(),
   update: jest.fn(),
+  destroy: jest.fn(),
 }));
 
 const app = express();
@@ -33,23 +33,27 @@ app.put('/api/profile', (req, res, next) => {
   req.userId = 1; // Mocked user ID
   next();
 }, updateProfile);
+app.delete('/api/profile', (req, res, next) => {
+  req.userId = 1; // Mocked user ID
+  next();
+}, deleteProfile);
 
 describe('Utilisateur Controller', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  test('POST /api/inscription devrait enregistrer un utilisateur', async () => {
+  test('POST /api/register devrait enregistrer un utilisateur', async () => {
     Utilisateur.create.mockResolvedValue({ idUtilisateur: 1, Email: 'test@example.com' });
     const response = await request(app)
       .post('/api/register')
-      .send({ Email: 'test@example.com', MotDePasse: 'password123' });
+      .send({ Email: 'test@example.com', MotDePasse: 'password123', Nom: 'John Doe' });
 
     expect(response.status).toBe(201);
     expect(response.body.message).toBe('Utilisateur enregistré');
   });
 
-  test('POST /api/connexion doit connecter un utilisateur', async () => {
+  test('POST /api/login doit connecter un utilisateur', async () => {
     const hashedPassword = await bcrypt.hash('password123', 10);
     Utilisateur.findOne.mockResolvedValue({ idUtilisateur: 1, Email: 'test@example.com', MotDePasse: hashedPassword });
     const response = await request(app)
@@ -60,7 +64,7 @@ describe('Utilisateur Controller', () => {
     expect(response.body.token).toBeDefined(); // Vérifie que le token est défini
   });
 
-  test('GET /api/profil devrait obtenir le profil utilisateur', async () => {
+  test('GET /api/profile devrait obtenir le profil utilisateur', async () => {
     Utilisateur.findByPk.mockResolvedValue({ idUtilisateur: 1, Nom: 'Test User' });
     const response = await request(app)
       .get('/api/profile')
@@ -71,7 +75,7 @@ describe('Utilisateur Controller', () => {
     expect(response.body.Nom).toBe('Test User'); // Assurez-vous que le champ Nom est correct
   });
 
-  test('PUT /api/profil doit mettre à jour le profil utilisateur', async () => {
+  test('PUT /api/profile doit mettre à jour le profil utilisateur', async () => {
     const mockUser = {
       idUtilisateur: 1,
       Nom: 'Test User',
@@ -88,4 +92,21 @@ describe('Utilisateur Controller', () => {
     expect(response.body.message).toBe('Profil mis à jour');
     expect(mockUser.update).toHaveBeenCalledWith({ Nom: 'Updated User' });
   });
+
+  test('DELETE /api/profile devrait supprimer le profil utilisateur', async () => {
+    const mockUser = {
+      idUtilisateur: 1,
+      destroy: jest.fn().mockResolvedValue()
+    };
+    Utilisateur.findByPk.mockResolvedValue(mockUser);
+
+    const response = await request(app)
+      .delete('/api/profile')
+      .set('Authorization', 'Bearer fake-jwt-token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Profil supprimé avec succès');
+    expect(mockUser.destroy).toHaveBeenCalled();
+  });
 });
+
