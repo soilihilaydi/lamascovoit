@@ -37,7 +37,9 @@ const sequelize = new Sequelize(
   environmentConfig.password,
   {
     host: environmentConfig.host,
-    dialect: environmentConfig.dialect
+    dialect: environmentConfig.dialect,
+    logging: console.log 
+  
   }
 );
 
