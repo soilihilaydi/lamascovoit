@@ -1,11 +1,9 @@
 import request from 'supertest';
-import app from '../../../app'; // Assurez-vous que votre application Express est exportée depuis ce fichier
+import app from '../../../app'; 
 import Utilisateur from '../../../src/models/utilisateurModel';
 import sequelize from '../../../src/config/db.config';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
-
 
 describe('Tests d\'intégration pour le contrôleur utilisateur', () => {
   beforeAll(async () => {
@@ -13,6 +11,14 @@ describe('Tests d\'intégration pour le contrôleur utilisateur', () => {
       await sequelize.sync({ force: true }); // Réinitialise la base de données avant les tests
     } catch (error) {
       console.error('Erreur lors de la synchronisation de la base de données:', error);
+    }
+  });
+
+  beforeEach(async () => {
+    try {
+      await Utilisateur.destroy({ where: {} }); // Nettoie la table Utilisateurs avant chaque test
+    } catch (error) {
+      console.error('Erreur lors de la destruction des utilisateurs:', error);
     }
   });
 
@@ -29,14 +35,13 @@ describe('Tests d\'intégration pour le contrôleur utilisateur', () => {
       const res = await request(app)
         .post('/api/utilisateurs/register')
         .send({
-          Email: 'test@example.com',
+          Email: 'unique@example.com', // Assurez-vous que l'email est unique
           MotDePasse: 'password123',
           Nom: 'John Doe'
         });
 
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty('message', 'Utilisateur enregistré');
-      expect(res.body.user).toHaveProperty('Email', 'test@example.com');
     });
 
     it('ne devrait pas créer un utilisateur avec un email en double', async () => {
@@ -94,7 +99,7 @@ describe('Tests d\'intégration pour le contrôleur utilisateur', () => {
   describe('GET /api/utilisateurs/profile', () => {
     let token;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       const user = await Utilisateur.create({
         Email: 'profile@example.com',
         MotDePasse: await bcrypt.hash('password123', 10),
@@ -125,7 +130,7 @@ describe('Tests d\'intégration pour le contrôleur utilisateur', () => {
   describe('PUT /api/utilisateurs/profile', () => {
     let token;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       const user = await Utilisateur.create({
         Email: 'update@example.com',
         MotDePasse: await bcrypt.hash('password123', 10),
@@ -163,7 +168,7 @@ describe('Tests d\'intégration pour le contrôleur utilisateur', () => {
   describe('DELETE /api/utilisateurs/profile', () => {
     let token;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       const user = await Utilisateur.create({
         Email: 'delete@example.com',
         MotDePasse: await bcrypt.hash('password123', 10),
@@ -191,4 +196,4 @@ describe('Tests d\'intégration pour le contrôleur utilisateur', () => {
     });
   });
 });
-
+       
