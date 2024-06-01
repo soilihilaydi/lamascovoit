@@ -1,4 +1,4 @@
-import { sequelize, UtilisateurModel, TrajetModel, EvaluationModel } from '../../../src/models/index.js';
+import { EvaluationModel } from '../../../src/models/index.js';
 
 describe('Evaluation Model', () => {
   

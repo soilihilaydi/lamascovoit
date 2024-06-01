@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes } from 'sequelize';
+import { Sequelize } from 'sequelize';
 import Reservation from '../../../src/models/reservationModel.js';
 import dotenv from 'dotenv';
 
@@ -22,14 +22,14 @@ describe('Reservation Model', () => {
   beforeAll(async () => {
     try {
       await sequelizeInstance.authenticate();
-      console.log('Connection has been established successfully.');
+      console.log('La connexion à la base de données a été établie avec succès.');
 
       // Désactiver les contraintes de clé étrangère temporairement
       await sequelizeInstance.query('SET FOREIGN_KEY_CHECKS = 0');
       await sequelizeInstance.sync({ force: true });
       await sequelizeInstance.query('SET FOREIGN_KEY_CHECKS = 1');
     } catch (error) { 
-      console.error('Unable to connect to the database:', error);
+      console.error('Impossible de se connecter à la base de données :', error);
     }
   });
 

@@ -12,7 +12,7 @@ app.get('/error', (req, res, next) => {
 });
 
 app.get('/error500', (req, res, next) => {
-  const error = new Error('Test Error with no status');
+  const error = new Error('Erreur de test sans statut');
   next(error);
 });
 
@@ -33,7 +33,7 @@ describe('Error Handler Middleware', () => {
     
 
     expect(response.status).toBe(500);
-    expect(response.body).toEqual({ message: 'Test Error with no status', stack: expect.any(String) });
+    expect(response.body).toEqual({ message: 'Erreur de test sans statut', stack: expect.any(String) });
   });
 });
 

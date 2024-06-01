@@ -3,12 +3,8 @@ import sequelize from '../../../src/config/db.config.js';
 
 dotenv.config({ path: '.env.test' });
 
-describe('Database Configuration', () => {
-  afterAll(async () => {
-    await sequelize.close();
-  });
-
-  it('devrait se connecter à la base de données de test', async () => {
+describe('Database Integration Tests', () => {
+  beforeAll(async () => {
     try {
       await sequelize.authenticate();
       console.log('La connexion à la base de données de test a été établie avec succès.');
@@ -17,7 +13,26 @@ describe('Database Configuration', () => {
     }
   });
 
-  it('devrait avoir des variables d environnement correctes', () => {
+  afterAll(async () => {
+    try {
+      await sequelize.close();
+      console.log('La connexion à la base de données de test a été fermée avec succès.');
+    } catch (error) {
+      console.error('Impossible de fermer la connexion à la base de données de test :', error);
+    }
+  });
+
+  it('devrait se connecter à la base de données de test', async () => {
+    try {
+      await sequelize.authenticate();
+      console.log('La connexion à la base de données de test a été établie avec succès.');
+    } catch (error) {
+      console.error('Impossible de se connecter à la base de données de test :', error);
+      throw error;
+    }
+  });
+
+  it('devrait avoir des variables d\'environnement correctes', () => {
     expect(process.env.NODE_ENV).toBe('test');
     expect(process.env.TEST_DB_USER).toBeDefined();
     expect(process.env.TEST_DB_PASS).toBeDefined();

@@ -17,7 +17,7 @@ app.use('/api/utilisateurs', utilisateurRoutes);
 beforeAll(async () => {
   try {
     await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
+    console.log('La connexion a été établie avec succès.');
 
     await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
     await sequelize.sync({ force: true });

@@ -15,7 +15,7 @@ describe('Utilisateur Model', () => {
       await sequelize.sync({ force: true });
       await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
     } catch (error) {
-      console.error('Unable to connect to the database:', error);
+      console.error('Impossible de se connecter à la base de données :', error);
     }
   });
 
