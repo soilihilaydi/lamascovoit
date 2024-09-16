@@ -1,10 +1,10 @@
-import { EvaluationModel } from '../../../src/models/index.js';
+import models from '../../../src/models/index.js';
+
+const { Evaluation } = models;
 
 describe('Evaluation Model', () => {
-  
-
   test('devrait avoir des propriétés correctes', () => {
-    const attributes = EvaluationModel.rawAttributes;
+    const attributes = Evaluation.rawAttributes;
 
     expect(attributes).toHaveProperty('idEvaluation');
     expect(attributes).toHaveProperty('Note');
@@ -14,7 +14,9 @@ describe('Evaluation Model', () => {
   });
 
   test('devrait avoir des associations correctes', () => {
-    expect(EvaluationModel.associations).toHaveProperty('Utilisateur');
-    expect(EvaluationModel.associations).toHaveProperty('Trajet');
+    expect(Evaluation.associations).toHaveProperty('Utilisateur');
+    expect(Evaluation.associations).toHaveProperty('Trajet');
   });
 });
+
+

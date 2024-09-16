@@ -16,6 +16,10 @@ app.use('/api/utilisateurs', utilisateurRoutes);
 
 beforeAll(async () => {
   try {
+    // Importer les modèles avant la synchronisation
+    require('../../../src/models/utilisateurModel.js');
+    // Importez d'autres modèles si nécessaire
+
     await sequelize.authenticate();
     console.log('La connexion a été établie avec succès.');
 
@@ -23,7 +27,7 @@ beforeAll(async () => {
     await sequelize.sync({ force: true });
     await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
   } catch (error) {
-    console.error('Unable to connect to the database:', error);
+    console.error('Impossible de se connecter à la base de données :', error);
   }
 });
 
@@ -55,7 +59,7 @@ describe('Tests d\'intégration pour les routes Utilisateur', () => {
       MotDePasse: 'password123',
       Nom: 'Jane Doe'
     };
-    await Utilisateur.create(duplicateUser);
+    await Utilisateur.create({ ...duplicateUser, MotDePasse: await bcrypt.hash(duplicateUser.MotDePasse, 10) });
 
     const response = await request(app)
       .post('/api/utilisateurs/register')
@@ -143,3 +147,4 @@ describe('Tests d\'intégration pour les routes Utilisateur', () => {
     expect(response.body.message).toBe('Profil supprimé avec succès');
   });
 });
+

@@ -1,4 +1,4 @@
-import { Sequelize} from 'sequelize';
+import { Sequelize } from 'sequelize';
 import Trajet from '../../../src/models/trajetModel.js';
 import dotenv from 'dotenv';
 
@@ -16,7 +16,8 @@ const sequelizeInstance = new Sequelize(
   }
 );
 
-const TrajetModel = Trajet(sequelizeInstance);
+// Supprimez cette ligne
+// const TrajetModel = Trajet(sequelizeInstance);
 
 describe('Trajet Model', () => {
   beforeAll(async () => {
@@ -33,23 +34,27 @@ describe('Trajet Model', () => {
   });
 
   test('devrait avoir un nom de modèle et des propriétés corrects', () => {
-    expect(TrajetModel.tableName).toBe('Trajets');
-    expect(TrajetModel.rawAttributes.idTrajet.type.key).toBe('INTEGER');
-    expect(TrajetModel.rawAttributes.Départ.type.key).toBe('STRING');
-    expect(TrajetModel.rawAttributes.Arrivée.type.key).toBe('STRING');
+    expect(Trajet.tableName).toBe('Trajets');
+    expect(Trajet.rawAttributes.idTrajet.type.key).toBe('INTEGER');
+    expect(Trajet.rawAttributes.Départ.type.key).toBe('STRING');
+    expect(Trajet.rawAttributes.Arrivée.type.key).toBe('STRING');
   });
 
   test('devrait être initialisé avec les propriétés correctes', () => {
-    const trajet = TrajetModel.build({
+    const trajet = Trajet.build({
       Départ: 'Paris',
       Arrivée: 'Lyon',
       DateHeure: new Date(),
-      NombreDePlaces: 3
+      PlacesDisponibles: 3,
+      Prix: 25.50,
+      idUtilisateur: 1
     });
-
+    
     expect(trajet.Départ).toBe('Paris');
     expect(trajet.Arrivée).toBe('Lyon');
     expect(trajet.DateHeure).toBeInstanceOf(Date);
-    expect(trajet.NombreDePlaces).toBe(3);
-    });
-   });
+    expect(trajet.PlacesDisponibles).toBe(3);
+    expect(trajet.Prix).toBe(25.50);
+    expect(trajet.idUtilisateur).toBe(1);
+  });
+});

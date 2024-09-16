@@ -9,6 +9,10 @@ jest.mock('../../../src/middlewares/authMiddleware.js', () => ({
     req.userId = 1; // Mocked user ID
     next();
   },
+  verifyAdmin: (req, res, next) => {
+    req.isAdmin = true;
+    next();
+  },
 }));
 
 // Mock the controller functions
@@ -18,6 +22,9 @@ jest.mock('../../../src/controllers/utilisateurController.js', () => ({
   getProfile: (req, res) => res.status(200).json({ id: req.userId, name: 'Test User' }),
   updateProfile: (req, res) => res.status(200).json({ message: 'Profil mis à jour' }),
   deleteProfile: (req, res) => res.status(200).json({ message: 'Profil supprimé avec succès' }),
+  getAllUsers: (req, res) => res.status(200).json({ users: [] }),
+  getUserById: (req, res) => res.status(200).json({ id: req.params.id, name: `User ${req.params.id}` }),
+  updateUser: (req, res) => res.status(200).json({ message: 'Utilisateur mis à jour' }), // Ajouté ici
 }));
 
 const app = express();
@@ -71,5 +78,38 @@ describe('Utilisateur Routes', () => {
     expect(response.status).toBe(200);
     expect(response.body.message).toBe('Profil supprimé avec succès');
   });
+
+  test('GET /api/utilisateur/ devrait récupérer tous les utilisateurs', async () => {
+    const response = await request(app)
+      .get('/api/utilisateur/')
+      .set('Authorization', 'Bearer fake-jwt-token');
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body.users)).toBe(true);
+  });
+
+  test('GET /api/utilisateur/:id devrait obtenir un utilisateur par ID', async () => {
+    const response = await request(app)
+      .get('/api/utilisateur/1')
+      .set('Authorization', 'Bearer fake-jwt-token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.id).toBe('1');
+    expect(response.body.name).toBe('User 1');
+  });
+
+  test('PUT /api/utilisateur/:id devrait mettre à jour un utilisateur', async () => {
+    const response = await request(app)
+      .put('/api/utilisateur/1')
+      .set('Authorization', 'Bearer fake-jwt-token')
+      .send({ name: 'Updated User' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Utilisateur mis à jour');
+  });
 });
+
+
+
+
 
