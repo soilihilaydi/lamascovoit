@@ -38,7 +38,10 @@ const sequelize = new Sequelize(
   {
     host: environmentConfig.host,
     dialect: environmentConfig.dialect,
-    logging: console.log 
+    logging: console.log, 
+    dialectOptions: {
+      connectTimeout: 60000
+    }
   
   }
 );
