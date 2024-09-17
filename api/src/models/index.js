@@ -1,9 +1,6 @@
+// src/models/index.js
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
-import Utilisateur from './utilisateurModel.js';
-import Reservation from './reservationModel.js';
-import Trajet from './trajetModel.js';
-import Evaluation from './evaluationModel.js';
 
 dotenv.config();
 
@@ -17,23 +14,41 @@ const sequelize = new Sequelize(
   }
 );
 
-const UtilisateurModel = Utilisateur;
-const ReservationModel = Reservation(sequelize);
-const TrajetModel = Trajet(sequelize);
-const EvaluationModel = Evaluation(sequelize);
+import Utilisateur from './utilisateurModel.js';
+import Reservation from './reservationModel.js';
+import Trajet from './trajetModel.js';
+import Evaluation from './evaluationModel.js';
 
-// Définir les associations
-UtilisateurModel.hasMany(ReservationModel, { foreignKey: 'idUtilisateur' });
-ReservationModel.belongsTo(UtilisateurModel, { foreignKey: 'idUtilisateur' });
+// Les modèles sont déjà initialisés avec sequelize dans leurs fichiers respectifs
 
-UtilisateurModel.hasMany(TrajetModel, { foreignKey: 'idUtilisateur' });
-TrajetModel.belongsTo(UtilisateurModel, { foreignKey: 'idUtilisateur' });
+// Définir les associations dans une fonction
+const associateModels = () => {
+  Utilisateur.hasMany(Reservation, { foreignKey: 'idUtilisateur' });
+  Reservation.belongsTo(Utilisateur, { foreignKey: 'idUtilisateur' });
 
-EvaluationModel.belongsTo(UtilisateurModel, { foreignKey: 'idUtilisateur' });
-EvaluationModel.belongsTo(TrajetModel, { foreignKey: 'idTrajet' });
+  Utilisateur.hasMany(Trajet, { foreignKey: 'idUtilisateur' });
+  Trajet.belongsTo(Utilisateur, { foreignKey: 'idUtilisateur' });
 
-UtilisateurModel.hasMany(EvaluationModel, { foreignKey: 'idUtilisateur' });
-TrajetModel.hasMany(EvaluationModel, { foreignKey: 'idTrajet' });
+  Evaluation.belongsTo(Utilisateur, { foreignKey: 'idUtilisateur' });
+  Evaluation.belongsTo(Trajet, { foreignKey: 'idTrajet' });
 
-export { sequelize, UtilisateurModel, ReservationModel, TrajetModel, EvaluationModel };
+  Utilisateur.hasMany(Evaluation, { foreignKey: 'idUtilisateur' });
+  Trajet.hasMany(Evaluation, { foreignKey: 'idTrajet' });
+};
+
+// Appeler la fonction pour définir les associations
+associateModels();
+
+// Regrouper les modèles dans un objet
+const models = {
+  Utilisateur,
+  Reservation,
+  Trajet,
+  Evaluation,
+};
+
+export { sequelize };
+export default models;
+
+
 

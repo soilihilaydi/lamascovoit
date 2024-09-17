@@ -1,7 +1,11 @@
-import { DataTypes } from 'sequelize';
 
-const Reservation = (sequelize) => {
-  return sequelize.define('Reservation', {
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../config/db.config.js';
+
+class Reservation extends Model {}
+
+Reservation.init(
+  {
     idReservation: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -19,10 +23,20 @@ const Reservation = (sequelize) => {
       type: DataTypes.DATE,
       allowNull: false
     }
-  }, {
-    tableName: 'Reservations',
-    timestamps: true
-  });
+  },
+  {
+    sequelize, // L'instance Sequelize doit être passée ici
+    modelName: 'Reservation', // Nom du modèle
+    tableName: 'Reservations', // Nom de la table dans la base de données
+    timestamps: true // Pour ajouter les champs createdAt et updatedAt
+  }
+);
+
+// Définir les associations si nécessaire
+Reservation.associate = (models) => {
+  Reservation.belongsTo(models.Utilisateur, { foreignKey: 'idUtilisateur' });
+  Reservation.belongsTo(models.Trajet, { foreignKey: 'idTrajet' });
 };
 
 export default Reservation;
+
