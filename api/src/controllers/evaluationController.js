@@ -64,5 +64,3 @@ export const deleteEvaluation = async (req, res) => {
     res.status(500).json({ message: 'Erreur lors de la suppression de l\'évaluation', error });
   }
 };
-
-

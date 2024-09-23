@@ -1,51 +1,8 @@
 import express from 'express';
-import { register, login, getProfile, updateProfile, deleteProfile, getAllUsers, getUserById, updateUser } from '../controllers/utilisateurController.js';
+import { register, login, getProfile, updateProfile, deleteProfile, getAllUsers, getUserById, updateUser, deleteUser } from '../controllers/utilisateurController.js';
 import { verifyToken, verifyAdmin } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Utilisateur:
- *       type: object
- *       required:
- *         - nom
- *         - prenom
- *         - email
- *         - motDePasse
- *       properties:
- *         idUtilisateur:
- *           type: integer
- *           description: L'identifiant unique de l'utilisateur
- *         nom:
- *           type: string
- *           description: Le nom de l'utilisateur
- *         prenom:
- *           type: string
- *           description: Le prénom de l'utilisateur
- *         email:
- *           type: string
- *           format: email
- *           description: L'adresse email de l'utilisateur
- *         motDePasse:
- *           type: string
- *           format: password
- *           description: Le mot de passe de l'utilisateur
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- */
-
-/**
- * @swagger
- * tags:
- *   name: Utilisateurs
- *   description: Gestion des utilisateurs
- */
 
 /**
  * @swagger
@@ -277,6 +234,6 @@ router.put('/:id', verifyToken, verifyAdmin, updateUser);
  *       403:
  *         description: Accès refusé
  */
-router.delete('/:id', verifyToken, verifyAdmin, deleteProfile);
+router.delete('/:id', verifyToken, verifyAdmin, deleteUser); // Correction ici pour utiliser deleteUser
 
 export default router;

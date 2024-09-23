@@ -1,8 +1,31 @@
-
 import { Model, DataTypes } from 'sequelize';
-import sequelize from '../config/db.config.js';
+import sequelize from '../config/db.config.js';  // Importation de l'instance Sequelize
 
-class Utilisateur extends Model {}
+class Utilisateur extends Model {
+  static associate(models) {
+    // Définir les associations avec onDelete et onUpdate
+    Utilisateur.hasMany(models.Reservation, {
+      foreignKey: 'idUtilisateur',
+      onDelete: 'CASCADE',  // Supprimer les réservations si l'utilisateur est supprimé
+      onUpdate: 'CASCADE',  // Mettre à jour les réservations si l'utilisateur est mis à jour
+      as: 'Reservations',   // Alias pour clarifier les jointures
+    });
+
+    Utilisateur.hasMany(models.Trajet, {
+      foreignKey: 'idUtilisateur',
+      onDelete: 'CASCADE',  // Supprimer les trajets si l'utilisateur est supprimé
+      onUpdate: 'CASCADE',  // Mettre à jour les trajets si l'utilisateur est mis à jour
+      as: 'Trajets',        // Alias pour clarifier les jointures
+    });
+
+    Utilisateur.hasMany(models.Evaluation, {
+      foreignKey: 'idUtilisateur',
+      onDelete: 'CASCADE',  // Supprimer les évaluations si l'utilisateur est supprimé
+      onUpdate: 'CASCADE',  // Mettre à jour les évaluations si l'utilisateur est mis à jour
+      as: 'Evaluations',    // Alias pour clarifier les jointures
+    });
+  }
+}
 
 Utilisateur.init(
   {
@@ -28,7 +51,7 @@ Utilisateur.init(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
-    NuméroDeTéléphone: {
+    NumeroDeTelephone: {
       type: DataTypes.STRING(20),
       allowNull: true,
     },
@@ -36,25 +59,24 @@ Utilisateur.init(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
-    Rôle: {
+    Role: {
       type: DataTypes.STRING(50),
       allowNull: true,
     },
   },
   {
-    sequelize, // L'instance Sequelize doit être passée ici
-    modelName: 'Utilisateur', // Nom du modèle
-    tableName: 'Utilisateurs', // Nom de la table dans la base de données
-    timestamps: true, // Pour ajouter les champs createdAt et updatedAt
+    sequelize, // Utilisation de l'instance Sequelize importée
+    modelName: 'Utilisateur', 
+    tableName: 'Utilisateurs', 
+    timestamps: true, // Ajoute les champs createdAt et updatedAt
+    paranoid: true,   // Ajoute le champ deletedAt pour une suppression "douce" (soft delete)
   }
 );
 
-// Définir les associations si nécessaire
-Utilisateur.associate = (models) => {
-  Utilisateur.hasMany(models.Reservation, { foreignKey: 'idUtilisateur' });
-  Utilisateur.hasMany(models.Trajet, { foreignKey: 'idUtilisateur' });
-  Utilisateur.hasMany(models.Evaluation, { foreignKey: 'idUtilisateur' });
-};
-
 export default Utilisateur;
+
+
+
+
+
 

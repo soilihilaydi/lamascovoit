@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const env = process.env.NODE_ENV || 'test'; 
+const env = process.env.NODE_ENV || 'development';
 
 const config = {
   development: {
@@ -11,21 +11,21 @@ const config = {
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
-    dialect: process.env.DB_DIALECT
+    dialect: process.env.DB_DIALECT || 'mysql',
   },
   test: {
     username: process.env.TEST_DB_USER,
     password: process.env.TEST_DB_PASS,
     database: process.env.TEST_DB_NAME,
     host: process.env.TEST_DB_HOST,
-    dialect: process.env.TEST_DB_DIALECT
+    dialect: process.env.TEST_DB_DIALECT || 'mysql',
   },
   production: {
     username: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
-    dialect: process.env.DB_DIALECT
+    dialect: process.env.DB_DIALECT || 'mysql',
   }
 };
 
@@ -38,14 +38,16 @@ const sequelize = new Sequelize(
   {
     host: environmentConfig.host,
     dialect: environmentConfig.dialect,
-    logging: console.log, 
+    logging: env === 'test' ? false : console.log, 
     dialectOptions: {
-      connectTimeout: 60000
-    }
-  
+      connectTimeout: 60000,
+    },
   }
 );
 
 export default sequelize;
+
+
+
 
 
