@@ -1,3 +1,4 @@
+// app.js
 import 'dotenv/config';
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
@@ -9,7 +10,8 @@ import evaluationRoutes from './src/routes/evaluationRoutes.js';
 import { notFound, errorHandler } from './src/middlewares/errorHandler.js';
 import xssProtection from './src/middlewares/xssProtection.js';
 
-
+// Importer les modèles pour initialiser les associations
+import './src/models/index.js';
 
 const app = express();
 
@@ -34,7 +36,6 @@ const options = {
 const specs = swaggerJsdoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
-
 // Middleware pour parser le JSON
 app.use(express.json());
 app.use(xssProtection); // Protection XSS
@@ -52,6 +53,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 export default app;
+
 
 
 
