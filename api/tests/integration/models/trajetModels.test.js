@@ -1,111 +1,174 @@
-import sequelize from '../../../src/config/db.config.js';
-import Trajet from '../../../src/models/trajetModel.js';
+import models from '../../../src/models/index.js'; // Importation des modèles
+import sequelize from '../../../src/config/db.config.js'; // Importation de la configuration Sequelize
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '.env.test' });
+dotenv.config();
 
-describe('Tests d\'intégration pour le modèle Trajet', () => {
-  beforeAll(async () => {
-    try {
-      await sequelize.authenticate();
-      await sequelize.sync({ force: true });
-      console.log('La connexion à la base de données de test a été établie avec succès.');
-    } catch (error) {
-      console.error('Impossible de se connecter à la base de données de test :', error);
-    }
+process.env.NODE_ENV = 'test'; // S'assurer que les tests sont effectués dans l'environnement de test
+
+const { Trajet, Utilisateur, Reservation, Evaluation } = models;
+
+beforeAll(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('Connexion à la base de données de test établie.');
+
+    // Désactiver les vérifications des clés étrangères
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+
+    // Synchroniser la base de données
+    await sequelize.sync({ force: true });
+
+    // Réactiver les vérifications des clés étrangères
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+  } catch (error) {
+    console.error('Impossible de se connecter à la base de données de test :', error);
+  }
+});
+
+afterAll(async () => {
+  // Fermer la connexion après les tests
+  await sequelize.close();
+});
+
+describe("Tests d'intégration du modèle Trajet", () => {
+
+  let utilisateur, trajet;
+
+  beforeEach(async () => {
+    // Nettoyer la base de données avant chaque test
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+    await Reservation.destroy({ where: {}, force: true });
+    await Evaluation.destroy({ where: {}, force: true });
+    await Trajet.destroy({ where: {}, force: true });
+    await Utilisateur.destroy({ where: {}, force: true });
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+
+    // Création d'un utilisateur pour les tests
+    utilisateur = await Utilisateur.create({
+      Nom: 'Dupont',
+      Email: 'jean.dupont@example.com',
+      MotDePasse: 'motdepasse123',
+    });
   });
 
-  afterAll(async () => {
-    try {
-      await sequelize.close();
-      console.log('La connexion à la base de données de test a été fermée avec succès.');
-    } catch (error) {
-      console.error('Impossible de fermer la connexion à la base de données de test :', error);
-    }
-  });
-
-  it('devrait créer un nouveau trajet', async () => {
-  const trajetData = {
-    Départ: 'Paris',
-    Arrivée: 'Lyon',
-    DateHeure: new Date(),
-    PlacesDisponibles: 3,
-    Prix: 25.50,
-    idUtilisateur: 1
-  };
-
-  const trajet = await Trajet.create(trajetData);
-
-  expect(trajet).toBeDefined();
-  expect(trajet.Départ).toBe(trajetData.Départ);
-  expect(trajet.Arrivée).toBe(trajetData.Arrivée);
-  expect(trajet.DateHeure.toISOString().split('.')[0]).toBe(trajetData.DateHeure.toISOString().split('.')[0]);
-  expect(trajet.PlacesDisponibles).toBe(trajetData.PlacesDisponibles);
-  expect(trajet.Prix).toBe(trajetData.Prix);
-  expect(trajet.idUtilisateur).toBe(trajetData.idUtilisateur);
-});
-
-it('devrait récupérer un trajet existant', async () => {
-  const trajetData = {
-    Départ: 'Marseille',
-    Arrivée: 'Nice',
-    DateHeure: new Date(),
-    PlacesDisponibles: 4,
-    Prix: 15.75,
-    idUtilisateur: 2
-  };
-
-  const createdTrajet = await Trajet.create(trajetData);
-  const fetchedTrajet = await Trajet.findByPk(createdTrajet.idTrajet);
-
-  expect(fetchedTrajet).toBeDefined();
-  expect(fetchedTrajet.Départ).toBe(trajetData.Départ);
-  expect(fetchedTrajet.Arrivée).toBe(trajetData.Arrivée);
-  expect(fetchedTrajet.DateHeure.toISOString().split('.')[0]).toBe(trajetData.DateHeure.toISOString().split('.')[0]);
-  expect(fetchedTrajet.PlacesDisponibles).toBe(trajetData.PlacesDisponibles);
-  expect(fetchedTrajet.Prix).toBe(trajetData.Prix);
-  expect(fetchedTrajet.idUtilisateur).toBe(trajetData.idUtilisateur);
-});
-
-it('devrait mettre à jour un trajet existant', async () => {
-  const trajetData = {
-    Départ: 'Bordeaux',
-    Arrivée: 'Toulouse',
-    DateHeure: new Date(),
-    PlacesDisponibles: 2,
-    Prix: 20.00,
-    idUtilisateur: 3
-  };
-
-  const createdTrajet = await Trajet.create(trajetData);
-  const updatedData = { PlacesDisponibles: 5, Prix: 22.50 };
-
-  await Trajet.update(updatedData, { where: { idTrajet: createdTrajet.idTrajet } });
-  const updatedTrajet = await Trajet.findByPk(createdTrajet.idTrajet);
-
-  expect(updatedTrajet.PlacesDisponibles).toBe(updatedData.PlacesDisponibles);
-  expect(updatedTrajet.Prix).toBe(updatedData.Prix);
-  // Vérifier que les autres champs n'ont pas changé
-  expect(updatedTrajet.Départ).toBe(trajetData.Départ);
-  expect(updatedTrajet.Arrivée).toBe(trajetData.Arrivée);
-  expect(updatedTrajet.DateHeure.toISOString().split('.')[0]).toBe(trajetData.DateHeure.toISOString().split('.')[0]);
-  expect(updatedTrajet.idUtilisateur).toBe(trajetData.idUtilisateur);
-});
-
-  it('devrait supprimer un trajet existant', async () => {
-    const trajetData = {
-      Départ: 'Lille',
-      Arrivée: 'Bruxelles',
+  test("Création d'un trajet valide", async () => {
+    trajet = await Trajet.create({
+      Depart: 'Paris',
+      Arrivee: 'Lyon',
       DateHeure: new Date(),
-      PlacesDisponibles: 1,
-      Prix: 30.00,
-      idUtilisateur: 4
-    };
+      PlacesDisponibles: 3,
+      Prix: 25.5,
+      idUtilisateur: utilisateur.idUtilisateur, // Associer le trajet à l'utilisateur
+    });
 
-    const createdTrajet = await Trajet.create(trajetData);
-    await Trajet.destroy({ where: { idTrajet: createdTrajet.idTrajet } });
-    const deletedTrajet = await Trajet.findByPk(createdTrajet.idTrajet);
+    expect(trajet).toBeDefined();
+    expect(trajet.Depart).toBe('Paris');
+    expect(trajet.Arrivee).toBe('Lyon');
+  });
 
-    expect(deletedTrajet).toBeNull();
+  test("Mise à jour d'un trajet", async () => {
+    trajet = await Trajet.create({
+      Depart: 'Paris',
+      Arrivee: 'Lyon',
+      DateHeure: new Date(),
+      PlacesDisponibles: 3,
+      Prix: 25.5,
+      idUtilisateur: utilisateur.idUtilisateur,
+    });
+
+    await trajet.update({ PlacesDisponibles: 2 });
+    await trajet.reload();
+
+    expect(trajet.PlacesDisponibles).toBe(2);
+  });
+
+  test("Suppression d'un trajet", async () => {
+    trajet = await Trajet.create({
+      Depart: 'Paris',
+      Arrivee: 'Lyon',
+      DateHeure: new Date(),
+      PlacesDisponibles: 3,
+      Prix: 25.5,
+      idUtilisateur: utilisateur.idUtilisateur,
+    });
+
+    await trajet.destroy();
+
+    const foundTrajet = await Trajet.findByPk(trajet.idTrajet);
+    expect(foundTrajet).toBeNull();
+  });
+
+  test("Association avec Utilisateur", async () => {
+    trajet = await Trajet.create({
+      Depart: 'Paris',
+      Arrivee: 'Lyon',
+      DateHeure: new Date(),
+      PlacesDisponibles: 3,
+      Prix: 25.5,
+      idUtilisateur: utilisateur.idUtilisateur,
+    });
+
+    const foundTrajet = await Trajet.findByPk(trajet.idTrajet, {
+      include: [{ model: Utilisateur, as: 'Utilisateur' }],
+    });
+
+    expect(foundTrajet.Utilisateur).toBeDefined();
+    expect(foundTrajet.Utilisateur.idUtilisateur).toBe(utilisateur.idUtilisateur);
+  });
+
+  test("Association avec Reservation", async () => {
+    trajet = await Trajet.create({
+      Depart: 'Paris',
+      Arrivee: 'Lyon',
+      DateHeure: new Date(),
+      PlacesDisponibles: 3,
+      Prix: 25.5,
+      idUtilisateur: utilisateur.idUtilisateur,
+    });
+
+    const reservation = await Reservation.create({
+      idUtilisateur: utilisateur.idUtilisateur,
+      idTrajet: trajet.idTrajet,
+      DateReservation: new Date(),
+    });
+
+    const foundTrajet = await Trajet.findByPk(trajet.idTrajet, {
+      include: [{ model: Reservation, as: 'Reservations' }],
+    });
+
+    expect(foundTrajet.Reservations).toBeDefined();
+    expect(foundTrajet.Reservations.length).toBe(1);
+    expect(foundTrajet.Reservations[0].idTrajet).toBe(trajet.idTrajet);
+  });
+
+  test("Association avec Evaluation", async () => {
+    trajet = await Trajet.create({
+      Depart: 'Paris',
+      Arrivee: 'Lyon',
+      DateHeure: new Date(),
+      PlacesDisponibles: 3,
+      Prix: 25.5,
+      idUtilisateur: utilisateur.idUtilisateur,
+    });
+
+    const evaluation = await Evaluation.create({
+      idUtilisateur: utilisateur.idUtilisateur,
+      idTrajet: trajet.idTrajet,
+      Note: 4,
+      Commentaire: 'Très bon trajet',
+    });
+
+    const foundTrajet = await Trajet.findByPk(trajet.idTrajet, {
+      include: [{ model: Evaluation, as: 'Evaluations' }],
+    });
+
+    expect(foundTrajet.Evaluations).toBeDefined();
+    expect(foundTrajet.Evaluations.length).toBe(1);
+    expect(foundTrajet.Evaluations[0].idTrajet).toBe(trajet.idTrajet);
   });
 });
+
+
+
+

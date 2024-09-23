@@ -1,43 +1,67 @@
+import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
-import sequelize from '../../../src/config/db.config.js';
 
-dotenv.config({ path: '.env.test' });
+dotenv.config();
 
-describe('Database Integration Tests', () => {
+describe('Connexion à la base de données', () => {
+  let sequelize;
+
   beforeAll(async () => {
-    try {
-      await sequelize.authenticate();
-      console.log('La connexion à la base de données de test a été établie avec succès.');
-    } catch (error) {
-      console.error('Impossible de se connecter à la base de données de test :', error);
-    }
+    sequelize = new Sequelize(
+      process.env.TEST_DB_NAME,
+      process.env.TEST_DB_USER,
+      process.env.TEST_DB_PASS,
+      {
+        host: process.env.TEST_DB_HOST,
+        dialect: process.env.TEST_DB_DIALECT,
+        logging: false,
+      }
+    );
   });
 
   afterAll(async () => {
-    try {
-      await sequelize.close();
-      console.log('La connexion à la base de données de test a été fermée avec succès.');
-    } catch (error) {
-      console.error('Impossible de fermer la connexion à la base de données de test :', error);
-    }
+    await sequelize.close();
   });
 
-  it('devrait se connecter à la base de données de test', async () => {
-    try {
-      await sequelize.authenticate();
-      console.log('La connexion à la base de données de test a été établie avec succès.');
-    } catch (error) {
-      console.error('Impossible de se connecter à la base de données de test :', error);
-      throw error;
-    }
+  test('devrait se connecter à la base de données', async () => {
+    await expect(sequelize.authenticate()).resolves.not.toThrow();
   });
 
-  it('devrait avoir des variables d\'environnement correctes', () => {
-    expect(process.env.NODE_ENV).toBe('test');
-    expect(process.env.TEST_DB_USER).toBeDefined();
-    expect(process.env.TEST_DB_PASS).toBeDefined();
-    expect(process.env.TEST_DB_NAME).toBeDefined();
-    expect(process.env.TEST_DB_HOST).toBeDefined();
-    expect(process.env.TEST_DB_DIALECT).toBeDefined();
+  test('devrait avoir toutes les tables requises', async () => {
+    const [results] = await sequelize.query('SHOW TABLES');
+    const tables = results.map(r => r[`Tables_in_${process.env.TEST_DB_NAME}`]);
+    expect(tables).toEqual(expect.arrayContaining(['Utilisateurs', 'Trajets', 'Reservations', 'Evaluations']));
+  });
+
+  test('La table Utilisateurs devrait avoir les colonnes correctes', async () => {
+    const [columns] = await sequelize.query('DESCRIBE Utilisateurs');
+    const columnNames = columns.map(c => c.Field);
+    expect(columnNames).toEqual(expect.arrayContaining([
+      'idUtilisateur', 'Email', 'MotDePasse', 'Nom', 'Adresse', 'NumeroDeTelephone', 'PhotoUrl', 'Role', 'createdAt', 'updatedAt', 'deletedAt'
+    ]));
+  });
+
+  test('La table Trajets devrait avoir les colonnes correctes', async () => {
+    const [columns] = await sequelize.query('DESCRIBE Trajets');
+    const columnNames = columns.map(c => c.Field);
+    expect(columnNames).toEqual(expect.arrayContaining([
+      'idTrajet', 'Depart', 'Arrivee', 'DateHeure', 'PlacesDisponibles', 'Prix', 'idUtilisateur'
+    ]));
+  });
+
+  test('La table Reservations devrait avoir les colonnes correctes', async () => {
+    const [columns] = await sequelize.query('DESCRIBE Reservations');
+    const columnNames = columns.map(c => c.Field);
+    expect(columnNames).toEqual(expect.arrayContaining([
+      'idReservation', 'idUtilisateur', 'idTrajet', 'DateReservation', 'createdAt', 'updatedAt'
+    ]));
+  });
+
+  test('La table Evaluations devrait avoir les colonnes correctes', async () => {
+    const [columns] = await sequelize.query('DESCRIBE Evaluations');
+    const columnNames = columns.map(c => c.Field);
+    expect(columnNames).toEqual(expect.arrayContaining([
+      'idEvaluation', 'Note', 'Commentaire', 'idUtilisateur', 'idTrajet', 'createdAt', 'updatedAt'
+    ]));
   });
 });

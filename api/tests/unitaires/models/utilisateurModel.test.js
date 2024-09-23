@@ -29,18 +29,18 @@ describe('Utilisateur Model', () => {
       MotDePasse: 'password123',
       Nom: 'John Doe',
       Adresse: '123 Test St',
-      NuméroDeTéléphone: '1234567890',
+      NumeroDeTelephone: '1234567890',  // Nom corrigé
       PhotoUrl: 'http://example.com/photo.jpg',
-      Rôle: 'user'
+      Role: 'user'  // Nom corrigé
     });
 
     expect(utilisateur.Email).toBe('test@example.com');
     expect(utilisateur.MotDePasse).toBe('password123');
     expect(utilisateur.Nom).toBe('John Doe');
     expect(utilisateur.Adresse).toBe('123 Test St');
-    expect(utilisateur.NuméroDeTéléphone).toBe('1234567890');
+    expect(utilisateur.NumeroDeTelephone).toBe('1234567890');  // Nom corrigé
     expect(utilisateur.PhotoUrl).toBe('http://example.com/photo.jpg');
-    expect(utilisateur.Rôle).toBe('user');
+    expect(utilisateur.Role).toBe('user');  // Nom corrigé
   });
 
   it('ne devrait pas créer un utilisateur avec un email en double', async () => {
@@ -50,9 +50,9 @@ describe('Utilisateur Model', () => {
         MotDePasse: 'password123',
         Nom: 'Jane Doe',
         Adresse: '456 Test Ave',
-        NuméroDeTéléphone: '0987654321',
+        NumeroDeTelephone: '0987654321',  // Nom corrigé
         PhotoUrl: 'http://example.com/photo2.jpg',
-        Rôle: 'admin'
+        Role: 'admin'  // Nom corrigé
       });
     } catch (error) {
       expect(error).toBeDefined();
@@ -60,6 +60,7 @@ describe('Utilisateur Model', () => {
     }
   });
 });
+
 
 
    

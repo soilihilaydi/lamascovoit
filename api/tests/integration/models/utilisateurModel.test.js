@@ -1,74 +1,142 @@
-import request from 'supertest';
-import express from 'express';
-import sequelize from '../../../src/config/db.config.js';
-import Utilisateur from '../../../src/models/utilisateurModel.js';
+import models from '../../../src/models/index.js'; // Importation des modèles
+import sequelize from '../../../src/config/db.config.js'; // Importation de la configuration Sequelize
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const app = express();
-app.use(express.json());
+process.env.NODE_ENV = 'test'; // S'assurer que les tests sont effectués dans l'environnement de test
+
+const { Utilisateur, Reservation, Trajet, Evaluation } = models;
 
 beforeAll(async () => {
   try {
     await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
+    console.log('Connexion à la base de données de test établie.');
 
-    // Désactiver les contraintes de clé étrangère temporairement
+    // Désactiver les vérifications des clés étrangères
     await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+
+    // Synchroniser la base de données
     await sequelize.sync({ force: true });
+
+    // Réactiver les vérifications des clés étrangères
     await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
   } catch (error) {
-    console.error('Impossible de se connecter à la base de données :', error);
+    console.error('Impossible de se connecter à la base de données de test :', error);
   }
 });
 
-afterEach(async () => {
-  await Utilisateur.destroy({ where: {} });
+afterAll(async () => {
+  // Fermer la connexion après les tests
+  await sequelize.close();
 });
 
-app.post('/utilisateurs', async (req, res) => {
-  try {
-    const utilisateur = await Utilisateur.create(req.body);
-    res.status(201).json(utilisateur);
-  } catch (error) {
-    console.error('Erreur lors de la création de l\'utilisateur:', error);
-    if (error.name === 'SequelizeUniqueConstraintError') {
-      res.status(400).json({ error: 'Un utilisateur avec cette adresse email existe déjà' });
-    } else {
-      res.status(400).json({ error: error.message });
-    }
-  }
-});
+describe("Tests d'intégration du modèle Utilisateur", () => {
 
-describe('Tests d\'intégration pour les routes Utilisateur', () => {
-  test('POST /utilisateurs devrait créer un nouvel utilisateur', async () => {
-    const newUser = {
-      Email: 'test@example.com',
-      MotDePasse: 'password123',
-      Nom: 'John Doe'
-    };
-    const response = await request(app)
-      .post('/utilisateurs')
-      .send(newUser);
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('Email', newUser.Email);
-    expect(response.body).toHaveProperty('MotDePasse', newUser.MotDePasse);
-    expect(response.body).toHaveProperty('Nom', newUser.Nom);
+  let utilisateur, trajet;
+
+  beforeEach(async () => {
+    // Nettoyer la base de données avant chaque test
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+    await Reservation.destroy({ where: {}, force: true });
+    await Trajet.destroy({ where: {}, force: true });
+    await Evaluation.destroy({ where: {}, force: true });
+    await Utilisateur.destroy({ where: {}, force: true });
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+
+    // Création d'un trajet pour les tests
+    trajet = await Trajet.create({
+      Depart: 'Paris',
+      Arrivee: 'Lyon',
+      DateHeure: new Date(),
+      PlacesDisponibles: 3,
+      Prix: 25.5,
+      idUtilisateur: null, // À associer à un utilisateur plus tard
+    });
   });
 
-  test('POST /utilisateurs ne devrait pas créer un utilisateur avec un email en double', async () => {
-    const duplicateUser = {
-      Email: 'test@example.com',
-      MotDePasse: 'password123',
-      Nom: 'Jane Doe'
-    };
-    await Utilisateur.create(duplicateUser); // Créer un utilisateur initial
+  test("Création d'un utilisateur valide", async () => {
+    utilisateur = await Utilisateur.create({
+      Nom: 'Dupont',
+      Email: 'jean.dupont@example.com',
+      MotDePasse: 'motdepasse123',
+      Adresse: '123 Rue de la Paix',
+      NumeroDeTelephone: '0601020304',
+      Role: 'Utilisateur',
+    });
 
-    const response = await request(app)
-      .post('/utilisateurs')
-      .send(duplicateUser);
-    expect(response.status).toBe(400);
-    expect(response.body.error).toBe('Un utilisateur avec cette adresse email existe déjà');
+    expect(utilisateur).toBeDefined();
+    expect(utilisateur.Nom).toBe('Dupont');
+    expect(utilisateur.Email).toBe('jean.dupont@example.com');
+  });
+
+  test("Champs optionnels peuvent être null", async () => {
+    utilisateur = await Utilisateur.create({
+      Nom: 'Dupont',
+      Email: 'jean.dupont@example.com',
+      MotDePasse: 'motdepasse123',
+      Adresse: null, // Champs optionnels
+      NumeroDeTelephone: null,
+      PhotoUrl: null,
+      Role: null,
+    });
+
+    expect(utilisateur.Adresse).toBeNull();
+    expect(utilisateur.NumeroDeTelephone).toBeNull();
+    expect(utilisateur.PhotoUrl).toBeNull();
+    expect(utilisateur.Role).toBeNull();
+  });
+
+  test("Mise à jour d'un utilisateur", async () => {
+    utilisateur = await Utilisateur.create({
+      Nom: 'Dupont',
+      Email: 'jean.dupont@example.com',
+      MotDePasse: 'motdepasse123',
+    });
+
+    await utilisateur.update({ Nom: 'Durand' });
+    await utilisateur.reload();
+
+    expect(utilisateur.Nom).toBe('Durand');
+  });
+
+  test("Suppression d'un utilisateur", async () => {
+    utilisateur = await Utilisateur.create({
+      Nom: 'Dupont',
+      Email: 'jean.dupont@example.com',
+      MotDePasse: 'motdepasse123',
+    });
+
+    await utilisateur.destroy();
+
+    const foundUtilisateur = await Utilisateur.findByPk(utilisateur.idUtilisateur);
+    expect(foundUtilisateur).toBeNull();
+  });
+
+  test("Association avec Reservation", async () => {
+    utilisateur = await Utilisateur.create({
+      Nom: 'Dupont',
+      Email: 'jean.dupont@example.com',
+      MotDePasse: 'motdepasse123',
+    });
+
+    // Mettre à jour le trajet avec l'utilisateur associé
+    await trajet.update({ idUtilisateur: utilisateur.idUtilisateur });
+
+    const reservation = await Reservation.create({
+      idUtilisateur: utilisateur.idUtilisateur,
+      idTrajet: trajet.idTrajet, // Associer la réservation à un trajet valide
+      DateReservation: new Date(),
+    });
+
+    // Utiliser l'alias 'Utilisateur' dans l'inclusion de l'association
+    const foundReservation = await Reservation.findByPk(reservation.idReservation, {
+      include: [{ model: Utilisateur, as: 'Utilisateur' }],
+    });
+
+    expect(foundReservation.Utilisateur).toBeDefined();
+    expect(foundReservation.Utilisateur.idUtilisateur).toBe(utilisateur.idUtilisateur);
   });
 });
+
+

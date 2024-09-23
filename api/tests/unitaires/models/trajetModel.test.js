@@ -11,50 +11,53 @@ const sequelizeInstance = new Sequelize(
   process.env.TEST_DB_PASS,
   {
     host: process.env.TEST_DB_HOST,
-    dialect: process.env.TEST_DB_DIALECT,
+    dialect: process.env.TEST_DB_DIALECT || 'mysql',
     logging: false, // Désactiver les logs SQL pour les tests
   }
 );
-
-// Supprimez cette ligne
-// const TrajetModel = Trajet(sequelizeInstance);
 
 describe('Trajet Model', () => {
   beforeAll(async () => {
     try {
       await sequelizeInstance.authenticate();
       console.log('La connexion à la base de données a été établie avec succès.');
+      
       // Désactiver les contraintes de clé étrangère temporairement
       await sequelizeInstance.query('SET FOREIGN_KEY_CHECKS = 0');
-      await sequelizeInstance.sync({ force: true });
+      await sequelizeInstance.sync({ force: true }); // Réinitialise les tables de test
       await sequelizeInstance.query('SET FOREIGN_KEY_CHECKS = 1');
     } catch (error) {
       console.error('Impossible de se connecter à la base de données :', error);
     }
   });
 
-  test('devrait avoir un nom de modèle et des propriétés corrects', () => {
+  test('devrait avoir un nom de modèle et des propriétés correctes', () => {
     expect(Trajet.tableName).toBe('Trajets');
     expect(Trajet.rawAttributes.idTrajet.type.key).toBe('INTEGER');
-    expect(Trajet.rawAttributes.Départ.type.key).toBe('STRING');
-    expect(Trajet.rawAttributes.Arrivée.type.key).toBe('STRING');
+    expect(Trajet.rawAttributes.Depart.type.key).toBe('STRING');  // Correction : Depart sans accent
+    expect(Trajet.rawAttributes.Arrivee.type.key).toBe('STRING'); // Correction : Arrivee sans accent
   });
 
   test('devrait être initialisé avec les propriétés correctes', () => {
     const trajet = Trajet.build({
-      Départ: 'Paris',
-      Arrivée: 'Lyon',
+      Depart: 'Paris',  // Correction : Depart sans accent
+      Arrivee: 'Lyon',  // Correction : Arrivee sans accent
       DateHeure: new Date(),
       PlacesDisponibles: 3,
       Prix: 25.50,
       idUtilisateur: 1
     });
     
-    expect(trajet.Départ).toBe('Paris');
-    expect(trajet.Arrivée).toBe('Lyon');
+    expect(trajet.Depart).toBe('Paris');
+    expect(trajet.Arrivee).toBe('Lyon');
     expect(trajet.DateHeure).toBeInstanceOf(Date);
     expect(trajet.PlacesDisponibles).toBe(3);
     expect(trajet.Prix).toBe(25.50);
     expect(trajet.idUtilisateur).toBe(1);
   });
+  
+  afterAll(async () => {
+    await sequelizeInstance.close(); // Ferme la connexion après les tests
+  });
 });
+

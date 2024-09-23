@@ -27,11 +27,11 @@ describe('Auth Middleware', () => {
     expect(response.body).toEqual({ message: 'Accès refusé : aucun token fourni' });
   });
 
-  test('devrait renvoyer 400 si le token est invalide', async () => {
+  test('devrait renvoyer 401 si le token est invalide', async () => {
     const response = await request(app)
       .get('/protected')
       .set('Authorization', 'Bearer invalidToken');
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(401);
     expect(response.body).toEqual({ message: 'Token invalide' });
   });
 
@@ -42,6 +42,19 @@ describe('Auth Middleware', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ message: 'Accès autorisé', userId: 'testUserId' });
   });
+
+  test('devrait renvoyer 401 si le token a expiré', async () => {
+    // Crée un token qui expire instantanément
+    const expiredToken = jwt.sign({ id: 'testUserId' }, JWT_SECRET, { expiresIn: '1ms' });
+    
+    const response = await request(app)
+      .get('/protected')
+      .set('Authorization', `Bearer ${expiredToken}`);
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({ message: 'Token expiré' });
+  });
 });
+
 
 
