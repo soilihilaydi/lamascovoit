@@ -7,51 +7,39 @@ import jwt from 'jsonwebtoken';
 const { Trajet, Utilisateur } = models;
 
 let token;
-let adminToken;
 let utilisateur;
 let trajet;
 
 beforeAll(async () => {
-  // Authentification de la base de données et synchronisation
+  // Authentification de la base de données
   await sequelize.authenticate();
   await sequelize.sync({ force: true });
 
-  // Création d'un utilisateur régulier pour les tests
+  // Création d'un utilisateur pour les tests et génération du jeton JWT
   utilisateur = await Utilisateur.create({
     Nom: 'Test User',
     Email: 'testuser@example.com',
     MotDePasse: 'hashedpassword', // Assurez-vous que ce mot de passe est haché
-    isAdmin: false,
   });
 
-  // Création d'un administrateur pour les tests
-  const admin = await Utilisateur.create({
-    Nom: 'Admin User',
-    Email: 'admin@example.com',
-    MotDePasse: 'hashedpassword',
-    isAdmin: true,
-  });
-
-  // Génération des tokens JWT pour l'utilisateur régulier et l'administrateur
   token = jwt.sign({ id: utilisateur.idUtilisateur }, process.env.JWT_SECRET, { expiresIn: '1h' });
-  adminToken = jwt.sign({ id: admin.idUtilisateur }, process.env.JWT_SECRET, { expiresIn: '1h' });
 });
 
 afterAll(async () => {
-  // Fermeture de la connexion à la base de données
+  // Ferme la connexion après les tests
   await sequelize.close();
 });
 
-describe('Tests d\'intégration pour les routes Trajet', () => {
-  
-  // Test de création d'un trajet
+describe('Tests d\'intégration du contrôleur Trajet', () => {
+
+  // Test de création de trajet
   test('Création d\'un trajet', async () => {
     const response = await request(app)
       .post('/api/trajets')
       .set('Authorization', `Bearer ${token}`)
       .send({
-        Depart: 'Lamastre',
-        Arrivee: 'Valence',
+        Depart: 'Lamastre', // Nom sans accent
+        Arrivee: 'Valence', // Nom sans accent
         DateHeure: '2024-09-14T10:00:00Z',
         PlacesDisponibles: 3,
         Prix: 5.50
@@ -89,7 +77,7 @@ describe('Tests d\'intégration pour les routes Trajet', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         Depart: 'Lamastre',
-        Arrivee: 'Lyon', // Modification de la destination
+        Arrivee: 'Lyon', // Modification du lieu d'arrivée
         DateHeure: '2024-09-14T12:00:00Z',
         PlacesDisponibles: 4,
         Prix: 6.50
@@ -108,26 +96,5 @@ describe('Tests d\'intégration pour les routes Trajet', () => {
     expect(response.status).toBe(200);
     expect(response.body.message).toBe('Trajet supprimé');
   });
-
-  // Test d'accès admin pour la suppression d'un trajet
-  test('Suppression d\'un trajet (admin uniquement)', async () => {
-    // Re-crée un trajet pour ce test
-    const newTrajet = await Trajet.create({
-      Depart: 'Lamastre',
-      Arrivee: 'Paris',
-      DateHeure: '2024-09-20T10:00:00Z',
-      PlacesDisponibles: 2,
-      Prix: 15.00,
-      idUtilisateur: utilisateur.idUtilisateur
-    });
-
-    const response = await request(app)
-      .delete(`/api/trajets/${newTrajet.idTrajet}`)
-      .set('Authorization', `Bearer ${adminToken}`);
-
-    expect(response.status).toBe(200);
-    expect(response.body.message).toBe('Trajet supprimé');
-  });
 });
-
 

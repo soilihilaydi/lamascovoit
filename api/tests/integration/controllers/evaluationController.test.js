@@ -1,10 +1,10 @@
-import models from '../../../src/models/index.js'; // Importation des modeles
+import models from '../../../src/models/index.js'; // Importation des modèles
 import sequelize from '../../../src/config/db.config.js'; // Importation de la configuration Sequelize
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-process.env.NODE_ENV = 'test'; // S'assurer que les tests sont effectues dans l'environnement de test
+process.env.NODE_ENV = 'test'; // S'assurer que les tests sont effectués dans l'environnement de test
 
 const { Utilisateur, Trajet, Evaluation } = models;
 
@@ -27,7 +27,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  // Fermer la connexion apres les tests
+  // Fermer la connexion après les tests
   await sequelize.close();
 });
 
@@ -134,5 +134,4 @@ describe("Tests d'integration du modele Evaluation", () => {
     expect(foundEvaluation.Trajet.idTrajet).toBe(trajet.idTrajet);
   });
 });
-``
 
