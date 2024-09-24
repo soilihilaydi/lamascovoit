@@ -31,11 +31,11 @@ Trajet.init(
       primaryKey: true,
       autoIncrement: true,
     },
-    Depart: { // Nom sans accent
+    Depart: {
       type: DataTypes.STRING(100),
       allowNull: false,
     },
-    Arrivee: { // Nom sans accent
+    Arrivee: {
       type: DataTypes.STRING(100),
       allowNull: false,
     },
@@ -46,10 +46,16 @@ Trajet.init(
     PlacesDisponibles: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      validate: {
+        min: 0, // Empêche les valeurs négatives
+      },
     },
     Prix: {
       type: DataTypes.FLOAT,
       allowNull: false,
+      validate: {
+        min: 0, // Empêche les valeurs négatives
+      },
     },
     idUtilisateur: {
       type: DataTypes.INTEGER,
@@ -58,18 +64,19 @@ Trajet.init(
         model: 'Utilisateurs', // Assurez-vous que le nom de la table correspond bien
         key: 'idUtilisateur',
       },
-      onDelete: 'CASCADE', // Supprime le trajet si l'utilisateur est supprimé
-      onUpdate: 'CASCADE', // Met à jour le trajet si l'utilisateur est mis à jour
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
     },
   },
   {
     sequelize, // Utilisation de l'instance Sequelize
-    modelName: 'Trajet', // Nom du modèle
-    tableName: 'Trajets', // Nom de la table dans la base de données
-    timestamps: false, // Désactivé si vous ne voulez pas de createdAt et updatedAt
+    modelName: 'Trajet',
+    tableName: 'Trajets',
+    timestamps: false,
   }
 );
 
 export default Trajet;
+
 
 
