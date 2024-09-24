@@ -1,7 +1,6 @@
 import Utilisateur from '../models/utilisateurModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { Sequelize } from 'sequelize';
 
 // Fonction pour l'inscription d'un utilisateur
 export const register = async (req, res) => {
@@ -23,18 +22,20 @@ export const register = async (req, res) => {
   }
 };
 
+// Fonction pour la connexion d'un utilisateur
 export const login = async (req, res) => {
+  const { Email, MotDePasse } = req.body;
+
+  if (!Email || !MotDePasse) {
+    return res.status(400).json({ message: 'Les champs Email et MotDePasse sont obligatoires' });
+  }
+
   try {
-    const { Email, MotDePasse } = req.body;
-
-    if (!Email || !MotDePasse) {
-      return res.status(400).json({ message: 'Les champs Email et MotDePasse sont obligatoires' });
-    }
-
     const user = await Utilisateur.findOne({ where: { Email } });
     if (!user || !await bcrypt.compare(MotDePasse, user.MotDePasse)) {
       return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
     }
+
     const token = jwt.sign({ id: user.idUtilisateur }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ token });
   } catch (error) {
@@ -43,6 +44,7 @@ export const login = async (req, res) => {
   }
 };
 
+// Fonction pour récupérer le profil utilisateur
 export const getProfile = async (req, res) => {
   try {
     const user = await Utilisateur.findByPk(req.userId);
@@ -56,6 +58,7 @@ export const getProfile = async (req, res) => {
   }
 };
 
+// Fonction pour mettre à jour le profil utilisateur
 export const updateProfile = async (req, res) => {
   try {
     const user = await Utilisateur.findByPk(req.userId);
@@ -70,6 +73,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+// Fonction pour supprimer le profil utilisateur
 export const deleteProfile = async (req, res) => {
   try {
     const user = await Utilisateur.findByPk(req.userId);
@@ -84,6 +88,7 @@ export const deleteProfile = async (req, res) => {
   }
 };
 
+// Fonction pour récupérer tous les utilisateurs (admin uniquement)
 export const getAllUsers = async (req, res) => {
   try {
     const users = await Utilisateur.findAll();
@@ -94,6 +99,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
+// Fonction pour récupérer un utilisateur par ID
 export const getUserById = async (req, res) => {
   try {
     const user = await Utilisateur.findByPk(req.params.id);
@@ -107,6 +113,7 @@ export const getUserById = async (req, res) => {
   }
 };
 
+// Fonction pour mettre à jour un utilisateur par ID (admin uniquement)
 export const updateUser = async (req, res) => {
   try {
     const user = await Utilisateur.findByPk(req.params.id);
@@ -121,6 +128,7 @@ export const updateUser = async (req, res) => {
   }
 };
 
+// Fonction pour supprimer un utilisateur par ID (admin uniquement)
 export const deleteUser = async (req, res) => {
   try {
     const user = await Utilisateur.findByPk(req.params.id);
@@ -134,6 +142,7 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };
+
 
 
 

@@ -63,6 +63,10 @@ Utilisateur.init(
       type: DataTypes.STRING(50),
       allowNull: true,
     },
+    isAdmin: { // Ajoute ce champ pour gérer les administrateurs
+      type: DataTypes.BOOLEAN,
+      defaultValue: false, // Par défaut, un utilisateur n'est pas admin
+    },
   },
   {
     sequelize, // Utilisation de l'instance Sequelize importée
@@ -74,6 +78,7 @@ Utilisateur.init(
 );
 
 export default Utilisateur;
+
 
 
 

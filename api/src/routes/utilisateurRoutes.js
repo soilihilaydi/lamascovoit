@@ -1,5 +1,15 @@
 import express from 'express';
-import { register, login, getProfile, updateProfile, deleteProfile, getAllUsers, getUserById, updateUser, deleteUser } from '../controllers/utilisateurController.js';
+import { 
+  register, 
+  login, 
+  getProfile, 
+  updateProfile, 
+  deleteProfile, 
+  getAllUsers, 
+  getUserById, 
+  updateUser, 
+  deleteUser 
+} from '../controllers/utilisateurController.js';
 import { verifyToken, verifyAdmin } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -234,6 +244,7 @@ router.put('/:id', verifyToken, verifyAdmin, updateUser);
  *       403:
  *         description: Accès refusé
  */
-router.delete('/:id', verifyToken, verifyAdmin, deleteUser); // Correction ici pour utiliser deleteUser
+router.delete('/:id', verifyToken, verifyAdmin, deleteUser);
 
 export default router;
+

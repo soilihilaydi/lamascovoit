@@ -1,13 +1,12 @@
-// src/controllers/evaluationController.js
 import Evaluation from '../models/evaluationModel.js';
 
 export const createEvaluation = async (req, res) => {
   try {
     const { Note, Commentaire, idUtilisateur, idTrajet } = req.body;
     const evaluation = await Evaluation.create({ Note, Commentaire, idUtilisateur, idTrajet });
-    res.status(201).json({ message: 'Évaluation créée', evaluation });
+    res.status(201).json({ message: 'Evaluation creee', evaluation });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de la création de l\'évaluation', error });
+    res.status(500).json({ message: 'Erreur lors de la creation de l\'evaluation', error });
   }
 };
 
@@ -16,7 +15,7 @@ export const getEvaluations = async (req, res) => {
     const evaluations = await Evaluation.findAll();
     res.status(200).json(evaluations);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de la récupération des évaluations', error });
+    res.status(500).json({ message: 'Erreur lors de la recuperation des evaluations', error });
   }
 };
 
@@ -27,10 +26,10 @@ export const getEvaluationById = async (req, res) => {
     if (evaluation) {
       res.status(200).json(evaluation);
     } else {
-      res.status(404).json({ message: 'Évaluation non trouvée' });
+      res.status(404).json({ message: 'Evaluation non trouvee' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de la récupération de l\'évaluation', error });
+    res.status(500).json({ message: 'Erreur lors de la recuperation de l\'evaluation', error });
   }
 };
 
@@ -41,12 +40,12 @@ export const updateEvaluation = async (req, res) => {
     const evaluation = await Evaluation.findByPk(id);
     if (evaluation) {
       await evaluation.update({ Note, Commentaire });
-      res.status(200).json({ message: 'Évaluation mise à jour' });
+      res.status(200).json({ message: 'Evaluation mise a jour' });
     } else {
-      res.status(404).json({ message: 'Évaluation non trouvée' });
+      res.status(404).json({ message: 'Evaluation non trouvee' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de la mise à jour de l\'évaluation', error });
+    res.status(500).json({ message: 'Erreur lors de la mise a jour de l\'evaluation', error });
   }
 };
 
@@ -56,11 +55,12 @@ export const deleteEvaluation = async (req, res) => {
     const evaluation = await Evaluation.findByPk(id);
     if (evaluation) {
       await evaluation.destroy();
-      res.status(200).json({ message: 'Évaluation supprimée' });
+      res.status(200).json({ message: 'Evaluation supprimee' });
     } else {
-      res.status(404).json({ message: 'Évaluation non trouvée' });
+      res.status(404).json({ message: 'Evaluation non trouvee' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de la suppression de l\'évaluation', error });
+    res.status(500).json({ message: 'Erreur lors de la suppression de l\'evaluation', error });
   }
 };
+

@@ -1,6 +1,6 @@
 import express from 'express';
-import { register, login, getProfile, updateProfile, deleteProfile, getAllUsers, getUserById, updateUser } from '../controllers/utilisateurController.js';
-import { verifyToken, verifyAdmin } from '../middlewares/authMiddleware.js';
+import { createEvaluation, getEvaluations, getEvaluationById, updateEvaluation, deleteEvaluation } from '../controllers/evaluationController.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -8,192 +8,128 @@ const router = express.Router();
  * @swagger
  * components:
  *   schemas:
- *     Utilisateur:
+ *     Evaluation:
  *       type: object
  *       required:
- *         - nom
- *         - prenom
- *         - email
- *         - motDePasse
+ *         - Note
+ *         - idUtilisateur
+ *         - idTrajet
  *       properties:
+ *         idEvaluation:
+ *           type: integer
+ *           description: L'identifiant unique de l'évaluation
+ *         Note:
+ *           type: integer
+ *           description: La note de l'évaluation
+ *         Commentaire:
+ *           type: string
+ *           description: Le commentaire de l'évaluation
  *         idUtilisateur:
  *           type: integer
- *           description: L'identifiant unique de l'utilisateur
- *         nom:
- *           type: string
- *           description: Le nom de l'utilisateur
- *         prenom:
- *           type: string
- *           description: Le prénom de l'utilisateur
- *         email:
- *           type: string
- *           format: email
- *           description: L'adresse email de l'utilisateur
- *         motDePasse:
- *           type: string
- *           format: password
- *           description: Le mot de passe de l'utilisateur
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
+ *           description: L'ID de l'utilisateur qui a laissé l'évaluation
+ *         idTrajet:
+ *           type: integer
+ *           description: L'ID du trajet évalué
  */
 
 /**
  * @swagger
- * tags:
- *   name: Utilisateurs
- *   description: Gestion des utilisateurs
- */
-
-/**
- * @swagger
- * /api/utilisateurs/register:
+ * /api/evaluations:
  *   post:
- *     summary: Inscrit un nouvel utilisateur
- *     tags: [Utilisateurs]
+ *     summary: Crée une nouvelle évaluation
+ *     tags: [Evaluations]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Utilisateur'
+ *             $ref: '#/components/schemas/Evaluation'
  *     responses:
  *       201:
- *         description: Utilisateur créé avec succès
- *       400:
- *         description: Données invalides
+ *         description: Évaluation créée avec succès
+ *       500:
+ *         description: Erreur serveur
  */
-router.post('/register', register);
+router.post('/', verifyToken, createEvaluation);
 
 /**
  * @swagger
- * /api/utilisateurs/login:
- *   post:
- *     summary: Connecte un utilisateur
- *     tags: [Utilisateurs]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - motDePasse
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *               motDePasse:
- *                 type: string
- *                 format: password
- *     responses:
- *       200:
- *         description: Connexion réussie
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *       401:
- *         description: Identifiants invalides
- */
-router.post('/login', login);
-
-/**
- * @swagger
- * /api/utilisateurs/profile:
+ * /api/evaluations:
  *   get:
- *     summary: Récupère le profil de l'utilisateur connecté
- *     tags: [Utilisateurs]
+ *     summary: Récupère toutes les évaluations
+ *     tags: [Evaluations]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Profil de l'utilisateur
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Utilisateur'
- *       401:
- *         description: Non autorisé
+ *         description: Liste de toutes les évaluations
+ *       500:
+ *         description: Erreur serveur
  */
-router.get('/profile', verifyToken, getProfile);
+router.get('/', verifyToken, getEvaluations);
 
 /**
  * @swagger
- * /api/utilisateurs/profile:
+ * /api/evaluations/{id}:
+ *   get:
+ *     summary: Récupère une évaluation par son ID
+ *     tags: [Evaluations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: L'ID de l'évaluation
+ *     responses:
+ *       200:
+ *         description: Évaluation récupérée avec succès
+ *       404:
+ *         description: Évaluation non trouvée
+ */
+router.get('/:id', verifyToken, getEvaluationById);
+
+/**
+ * @swagger
+ * /api/evaluations/{id}:
  *   put:
- *     summary: Met à jour le profil de l'utilisateur connecté
- *     tags: [Utilisateurs]
+ *     summary: Met à jour une évaluation
+ *     tags: [Evaluations]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: L'ID de l'évaluation
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Utilisateur'
+ *             $ref: '#/components/schemas/Evaluation'
  *     responses:
  *       200:
- *         description: Profil mis à jour avec succès
- *       400:
- *         description: Données invalides
- *       401:
- *         description: Non autorisé
+ *         description: Évaluation mise à jour avec succès
+ *       404:
+ *         description: Évaluation non trouvée
+ *       500:
+ *         description: Erreur serveur
  */
-router.put('/profile', verifyToken, updateProfile);
+router.put('/:id', verifyToken, updateEvaluation);
 
 /**
  * @swagger
- * /api/utilisateurs/profile:
+ * /api/evaluations/{id}:
  *   delete:
- *     summary: Supprime le profil de l'utilisateur connecté
- *     tags: [Utilisateurs]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Profil supprimé avec succès
- *       401:
- *         description: Non autorisé
- */
-router.delete('/profile', verifyToken, deleteProfile);
-
-/**
- * @swagger
- * /api/utilisateurs:
- *   get:
- *     summary: Récupère tous les utilisateurs (admin seulement)
- *     tags: [Utilisateurs]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Liste de tous les utilisateurs
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Utilisateur'
- *       401:
- *         description: Non autorisé
- *       403:
- *         description: Accès refusé
- */
-router.get('/', verifyToken, verifyAdmin, getAllUsers);
-
-/**
- * @swagger
- * /api/utilisateurs/{id}:
- *   get:
- *     summary: Récupère un utilisateur par son ID
- *     tags: [Utilisateurs]
+ *     summary: Supprime une évaluation
+ *     tags: [Evaluations]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -202,81 +138,13 @@ router.get('/', verifyToken, verifyAdmin, getAllUsers);
  *         required: true
  *         schema:
  *           type: integer
- *         description: L'ID de l'utilisateur
+ *         description: L'ID de l'évaluation
  *     responses:
  *       200:
- *         description: Détails de l'utilisateur
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Utilisateur'
+ *         description: Évaluation supprimée avec succès
  *       404:
- *         description: Utilisateur non trouvé
- *       401:
- *         description: Non autorisé
+ *         description: Évaluation non trouvée
  */
-router.get('/:id', verifyToken, getUserById);
-
-/**
- * @swagger
- * /api/utilisateurs/{id}:
- *   put:
- *     summary: Met à jour un utilisateur par son ID (admin seulement)
- *     tags: [Utilisateurs]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: L'ID de l'utilisateur
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Utilisateur'
- *     responses:
- *       200:
- *         description: Utilisateur mis à jour avec succès
- *       400:
- *         description: Données invalides
- *       404:
- *         description: Utilisateur non trouvé
- *       401:
- *         description: Non autorisé
- *       403:
- *         description: Accès refusé
- */
-router.put('/:id', verifyToken, verifyAdmin, updateUser);
-
-/**
- * @swagger
- * /api/utilisateurs/{id}:
- *   delete:
- *     summary: Supprime un utilisateur par son ID (admin seulement)
- *     tags: [Utilisateurs]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: L'ID de l'utilisateur
- *     responses:
- *       200:
- *         description: Utilisateur supprimé avec succès
- *       404:
- *         description: Utilisateur non trouvé
- *       401:
- *         description: Non autorisé
- *       403:
- *         description: Accès refusé
- */
-router.delete('/:id', verifyToken, verifyAdmin, deleteProfile);
+router.delete('/:id', verifyToken, deleteEvaluation);
 
 export default router;
